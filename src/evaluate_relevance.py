@@ -1,4 +1,4 @@
-"""Compare grant ranking with tracker ratings or Michael's synthetic labels."""
+"""Compare grant ranking with tracker ratings or synthetic labels."""
 
 import argparse
 import hashlib
