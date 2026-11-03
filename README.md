@@ -43,10 +43,11 @@
 
 | Dataset/source | Link or access instructions                                                                                                        | Purpose    | Size / languages                  | Privacy or usage considerations |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ---------- | --------------------------------- | ------------------------------- |
-| [Ardook Data]  | [URL](https://docs.google.com/spreadsheets/d/1o_9ft5_eBtUpgBe9rj8TeUIXbJkzKGT7QQRXFxfDqdA/edit?gid=0#gid=0) or other instructions] | [Training] | [reference labels for evaluation] | [Notes]                         |
+| [Ardook Data]  | [URL](https://docs.google.com/spreadsheets/d/1o_9ft5_eBtUpgBe9rj8TeUIXbJkzKGT7QQRXFxfDqdA/edit?gid=0#gid=0)  | [Training] | [reference labels for evaluation] | [Original data that was given]                         |
+| [Ardook Mock Data]  | [found in our data folder] | [Training] | [mock data for training + testing] | [Created mock data using the original data we were given]                         |
 
-- **Data preparation:** [Cleaning, anonymization, annotation, splitting, deduplication, etc.]
-- **Data limitations:** [What is missing, noisy, or uncertain?]
+- **Data preparation:** [Cleaneed + deduplication]
+- **Data limitations:** [We had limited data, so we decided to create a mock version of the original data we were given to increase the number of test cases we can train our solution with]
 
 ### 4. Proposed evaluation
 
@@ -57,9 +58,9 @@
 | Quotes are real | Are our quotes and deadlines really in the grant source? | Check that each quote appears word for word in the spreadsheet row | 100% |
 | Missing info is flagged | Do we say "unknown" when information is missing? | For nonprofits with a missing detail, count the grants marked "unknown" instead of guessed | 100% |
 
-- **Evaluation examples:** We test on fake data made to look like the Ardook spreadsheet, and then on the real 37-grant spreadsheet. For the real one, each of us writes a few nonprofit profiles and marks which grants fit.
-- **Human verification:** The three of us check a sample of recommendations against the official grant pages. We also read each generated explanation to make sure it only says what's in the grant.
-- **Failure cases to watch:** (1) The generated explanation says something that isn't in the grant, because FLAN-T5-small is a small model. (2) Most requirements are free text we can't turn into rules, so many grants will stay "needs verification." (3) The fake data is cleaner than real data, so our scores on it will look better than they should.
+- **Evaluation examples:** We test on fake data made to look like the Ardook spreadsheet as well as on the real data
+- **Human verification:** We check a  sample of recommendations against the official grant pages. We also read each generated explanation to make sure it only says what's in the grant.
+- **Failure cases to watch:** The generated explanation says something that isn't in the grant, and the fake data is cleaner than real data, so our scores on it will look better than they should.
 
 ### 5. Team responsibilities
 
