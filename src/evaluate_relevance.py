@@ -18,7 +18,7 @@ from src.ardook_extra_synthetic_data import (
     load_profiles,
 )
 from src.ingest import load_grants
-from src.pipeline import OrganizationProfile, Pipeline
+from src.pipeline import DEFAULT_MIN_SIMILARITY, OrganizationProfile, Pipeline
 from src.vector_store import VectorStore
 
 K = 5
@@ -66,6 +66,7 @@ def _pipelines(grants, checker=None, store=None):
             checker=checker,
             embedder=KeywordEmbedder(),
             store=MemoryStore(),
+            chunk_weight=0,
         ),
     }
 
@@ -84,7 +85,7 @@ def _run(pipelines, profile, as_of, relevant, labels=None):
             profile,
             as_of=as_of,
             top_k=K,
-            min_similarity=0.25 if name == "semantic" else 1e-12,
+            min_similarity=DEFAULT_MIN_SIMILARITY if name == "semantic" else 1e-12,
         )
         rows = [item.source_row for item in recommendations]
         hits = sum(row in relevant for row in rows)
