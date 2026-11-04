@@ -8,6 +8,7 @@ class VectorStore:
         import chromadb
 
         self.client = chromadb.PersistentClient(path=path)
+        self.path = path
         self.name = name
         self.collection = self._create()
 
@@ -49,3 +50,11 @@ class VectorStore:
             id_: 1 - distance
             for id_, distance in zip(result["ids"][0], result["distances"][0])
         }
+
+    def embeddings(self, ids: list[str]) -> np.ndarray:
+        """Return stored embeddings in the requested ID order."""
+        if not ids:
+            return np.empty((0, 0))
+        result = self.collection.get(ids=ids, include=["embeddings"])
+        stored = dict(zip(result["ids"], result["embeddings"]))
+        return np.asarray([stored[id_] for id_ in ids])
