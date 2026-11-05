@@ -154,6 +154,14 @@ def _format_report(report):
         "",
         f"Applicant profile used: {report['profile']}",
         "",
+        report["labels"],
+        report["label_caveat"],
+        report["eligibility_caveat"],
+        f"Applicant attributes: {json.dumps(report['attributes'], sort_keys=True)}",
+        "These are team-entered ratings, not independently verified labels.",
+        "Open/rolling means the tracker text says so; grant websites were not checked.",
+        "Full grant eligibility is NOT measured.",
+        "",
         "RANKING COMPARISON",
         f"{'Method':<19} {'Relevant / 5 (returned)':>22} {'Precision@5':>12} "
         f"{'Recall@5':>14} {'Open/rolling':>13}",
@@ -181,6 +189,11 @@ def _format_report(report):
 
     lines.extend(
         [
+            "",
+            "How to read this:",
+            "- Precision@5: how many of the first five match the tracker rating.",
+            "- Recall@5: how many Strong/Excellent grants were found out of all available.",
+            "- Open/rolling is only the spreadsheet status, not live availability.",
             "",
             "TOP FIVE RECOMMENDATIONS",
         ]
