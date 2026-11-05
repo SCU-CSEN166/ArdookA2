@@ -4,7 +4,7 @@
 **Challenge:** Ardook
 **Team members:** Seerat Kakar, Jason Wu, Michael Tiburcio
 **Repository:** https://github.com/SCU-CSEN166/ArdookA2
-**Last updated:** Oct 28, 2026
+**Last updated:** Nov 5, 2026
 
 > **How to use this README:** Maintain this single file throughout the project. Complete the Week 5 project plan first, then update the appropriate weekly section before each milestone. Be specific and honest: describe what you attempted, what worked, what did not work, and what evidence supports your conclusions. For every week, document each member's actual contribution. If a task was not completed, explain the blocker and next step. Do not include private or sensitive data in this public README.
 
@@ -32,7 +32,7 @@
 
 ### 2. Proposed technical approach
 
-- **Pipeline:** This pipeline takes a nonprofit's profile and a spreadsheet of grant opportunities, removes all the opportunities which will fail known eligibility requirements, and ranks the remaining grants via semantic relevance. In this case, each recommendation will include a score (how good the rec is), the eligibility checks, and additional evidence. We use an LLM to generate a brief explanation of the grant fit for a nonprofit.
+- **Pipeline:** This pipeline takes a nonprofit’s profile and a spreadsheet of grant opportunities, checks which grants the nonprofit is eligible for, filters out those that don’t meet the requirements, compares the remaining grants to the nonprofit’s needs, and ranks them based on relevance. The ranking system looks at both the full grant description and specific sections to make sure important details aren’t missed. Each recommendation includes a relevance score and supporting evidence. We also use an LLM to give a short explanation of why each grant might be a good fit for the nonprofit.
 - **Baseline(s):** To evaluate our pipeline, we'll compare it to a simple keyword-overlap matcher with deterministic eligibility checks. Grants that don't pass requirements like having expired deadlines or incompatible organization types will be excluded when providing recommendations. In addition, if there's missing information in any grant, that'll be marked as unverified. For grants that pass these deterministic checks, they will be ranked by the proportion of nonprofit mission/description keywords which can be found in the grant's own description and requirements. Thus, this would be a good baseline for measuring whether semantic similarity does improve recommendation relevance.
 - **Proposed models/tools:**
   - [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) — Open source model that converts nonprofit descriptions and grant requirements into embeddings for ranking opportunities using cosine similarity. Selected as a lightweight model suited to semantic search.
@@ -52,12 +52,12 @@
 
 ### 4. Proposed evaluation
 
-| Metric / test           | What it measures                                         | How it will be calculated                                                                          | Target / success criterion      |
-| ----------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------- |
-| Good picks              | Are the grants we show actually good ones?               | Of the 5 grants we show, count the real matches, divide by 5, and average over all test nonprofits | At least 60% (we're at 43% now) |
-| Wrong eligibility       | Do we ever show a grant the nonprofit can't apply for?   | Shown grants that break a known rule, divided by all shown grants                                  | 0% (we're at 0% now)            |
-| Quotes are real         | Are our quotes and deadlines really in the grant source? | Check that each quote appears word for word in the spreadsheet row                                 | 100%                            |
-| Missing info is flagged | Do we say "unknown" when information is missing?         | For nonprofits with a missing detail, count the grants marked "unknown" instead of guessed         | 100%                            |
+| Metric / test                    | What it measures    | How it will be calculated | Target / success criterion |
+| -------------------------------- | ------------------- | ------------------------- | -------------------------- |
+| Good picks | Are the grants we show actually good ones? | Of the 5 grants we show, count the real matches, divide by 5, and average over all test nonprofits | At least 60%; currently 60% Precision@5 on tracker data |
+| Wrong eligibility | Do we ever show a grant the nonprofit can't apply for? | Shown grants that break a known rule, divided by all shown grants | 0% (we're at 0% now) |
+| Quotes are real | Are our quotes and deadlines really in the grant source? | Check that each quote appears word for word in the spreadsheet row | 100% |
+| Missing info is flagged | Do we say "unknown" when information is missing? | For nonprofits with a missing detail, count the grants marked "unknown" instead of guessed | 100% |
 
 - **Evaluation examples:** We test on fake data made to look like the Ardook spreadsheet as well as on the real data
 - **Human verification:** We check a sample of recommendations against the official grant pages. We also read each generated explanation to make sure it only says what's in the grant.
@@ -93,8 +93,9 @@
 
 ### Individual contributions during that week
 
-| Member   | What I personally implemented/tested                                                                                                                                                                                                                                    | Result (worked / partly / failed) | Evidence (commit, PR, experiment)        | Blocker / next step                                                                                     |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Member           | What I personally implemented/tested                                                                                                                                                                                                                                    | Result (worked / partly / failed) | Evidence (commit, PR, experiment)        | Blocker / next step                                                                                     |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Seerat Kakar     | I updated the ranking to compare an organization’s profile with the whole grant and its individual requirements. It now reuses saved embeddings and lets us set a minimum similarity score. I also added commands to run recommendations and compare them with the keyword baseline. | Worked | `bd643cae2a584f40487374cfdb4179c8013260ac` | Improve ranking performance by refining how grant relevance scores are calculated. |
 | Jason Wu | I updated the real data evaluator to use an explicit applicant profile and integrated workbook based eligibility rules for 6 programs into evaluations and recommendations. I also changed how conditional fit-labels were handled and CLI commands worked as intended. | Finished                          | 8ea4a922d27308a331ad788780288004b504f6cc | Continue to iterate on the pipeline and make sure that it's as accurate as possible for recommendations |
 | Michael Tiburcio  |  I updated our data and focused on making more inconsistent data to test whether or not our current pipelines and evaluations can flag when it is unsure whether the information is correct or not. I am also working on creating a reasoning feature, so it tells us why it is unsure about a recommendation (not enough information or too much guessing | Finished |  aad000250db026deb2ad6c7354e2027ece0916f2 | Continue to iterate on the reasoning part and get to a place where our model can be more consistent regardless of whether our data is clean or not |
 ---
@@ -128,7 +129,7 @@
 
 | Member | Work completed  | Result (worked / partly / failed) | Evidence | Next step   |
 | ------ | --------------- | --------------------------------- | -------- | ----------- |
-| [Name] | [Specific work] | [Status]                          | [Link]   | [Next step] |
+| [Name] | [Specific work] | [Status] | [Link] | [Next step] |
 
 ---
 
