@@ -4,7 +4,7 @@
 **Challenge:** Ardook
 **Team members:** Seerat Kakar, Jason Wu, Michael Tiburcio
 **Repository:** https://github.com/SCU-CSEN166/ArdookA2
-**Last updated:** Oct 28, 2026
+**Last updated:** Nov 5, 2026
 
 > **How to use this README:** Maintain this single file throughout the project. Complete the Week 5 project plan first, then update the appropriate weekly section before each milestone. Be specific and honest: describe what you attempted, what worked, what did not work, and what evidence supports your conclusions. For every week, document each member's actual contribution. If a task was not completed, explain the blocker and next step. Do not include private or sensitive data in this public README.
 
@@ -53,7 +53,7 @@
 
 | Metric / test                    | What it measures    | How it will be calculated | Target / success criterion |
 | -------------------------------- | ------------------- | ------------------------- | -------------------------- |
-| Good picks | Are the grants we show actually good ones? | Of the 5 grants we show, count the real matches, divide by 5, and average over all test nonprofits | At least 60% (we're at 43% now) |
+| Good picks | Are the grants we show actually good ones? | Of the 5 grants we show, count the real matches, divide by 5, and average over all test nonprofits | At least 60%; currently 47.0% Precision@5 on generated profiles (integration benchmark only, not independent evidence) |
 | Wrong eligibility | Do we ever show a grant the nonprofit can't apply for? | Shown grants that break a known rule, divided by all shown grants | 0% (we're at 0% now) |
 | Quotes are real | Are our quotes and deadlines really in the grant source? | Check that each quote appears word for word in the spreadsheet row | 100% |
 | Missing info is flagged | Do we say "unknown" when information is missing? | For nonprofits with a missing detail, count the grants marked "unknown" instead of guessed | 100% |
@@ -94,7 +94,7 @@
 
 | Member | What I personally implemented/tested | Result (worked / partly / failed) | Evidence (commit, PR, experiment) | Blocker / next step |
 | ------ | ------------------------------------ | --------------------------------- | --------------------------------- | ------------------- |
-| [Name] | [Specific contribution]              | [Status]                          | [Link]                            | [Next step]         |
+| Seerat Kakar | I updated the ranking to compare an organization’s profile with the whole grant and its individual requirements. It now reuses saved embeddings and lets us set a minimum similarity score. I also added commands to run recommendations and compare them with the keyword baseline. | Worked | `bd643cae2a584f40487374cfdb4179c8013260ac` | Improve ranking performance by refining how grant relevance scores are calculated. |
 
 ---
 
@@ -127,7 +127,7 @@
 
 | Member | Work completed  | Result (worked / partly / failed) | Evidence | Next step   |
 | ------ | --------------- | --------------------------------- | -------- | ----------- |
-| [Name] | [Specific work] | [Status]                          | [Link]   | [Next step] |
+| [Name] | [Specific work] | [Status] | [Link] | [Next step] |
 
 ---
 
