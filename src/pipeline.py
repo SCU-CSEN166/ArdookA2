@@ -9,6 +9,9 @@ import pandas as pd
 from src.ingest import load_grants
 from src.vector_store import VectorStore
 
+DEFAULT_MIN_SIMILARITY = 0.20
+DEFAULT_CHUNK_WEIGHT = 0.5
+
 
 class Embedder(Protocol):
     def encode(self, texts: list[str]) -> np.ndarray: ...
@@ -194,12 +197,16 @@ class Pipeline:
         generator: Generator | None = None,
         store: VectorStore | None = None,
         *,
+        chunk_weight: float = DEFAULT_CHUNK_WEIGHT,
         workbook: str = "Ardook_data.xlsx",
     ):
+        if not 0 <= chunk_weight <= 1:
+            raise ValueError("chunk_weight must be between 0 and 1")
         if grants is None:
             grants = load_grants(workbook)
         self.grants = grants.to_dict("records")
         self.embedder = embedder if embedder is not None else SemanticEncoder()
+        self.chunk_weight = chunk_weight
         self.checker = checker or EligibilityChecker()
         self.generator = generator
         unknown = self.checker.rules.keys() - {
@@ -208,6 +215,11 @@ class Pipeline:
         if unknown:
             raise ValueError(f"Rules reference unknown programs: {sorted(unknown)}")
         self.store = store or VectorStore()
+        self.chunk_store = (
+            VectorStore(path=self.store.path, name=f"{self.store.name}_chunks")
+            if isinstance(self.store, VectorStore)
+            else None
+        )
         documents = [
             "\n".join(f"{key}: {text(grant[key])}" for key in self.RETRIEVAL_FIELDS)
             for grant in self.grants
@@ -223,6 +235,40 @@ class Pipeline:
             if embeddings is not None and len(embeddings) != len(documents):
                 raise ValueError("Expected one embedding per grant")
             self.store.replace(ids, documents, embeddings, embedder_name)
+        self.chunk_owners = np.array([], dtype=int)
+        self.chunk_embeddings = np.empty((0, 0))
+        if self.chunk_weight:
+            chunks = []
+            chunk_ids = []
+            owners = []
+            for index, grant in enumerate(self.grants):
+                chunk_index = 0
+                for key in ("program", "type"):
+                    value = text(grant[key]).strip()
+                    if value:
+                        chunks.append(value)
+                        chunk_ids.append(f"{grant['source_row']}:{chunk_index}")
+                        owners.append(index)
+                        chunk_index += 1
+                for clause in text(grant["core_requirements"]).split(";"):
+                    if clause.strip():
+                        chunks.append(clause.strip())
+                        chunk_ids.append(f"{grant['source_row']}:{chunk_index}")
+                        owners.append(index)
+                        chunk_index += 1
+            if chunks and self.chunk_store:
+                if not self.chunk_store.is_current(chunk_ids, chunks, embedder_name):
+                    embeddings = self._normalize(self.embedder.encode(chunks))
+                    self.chunk_store.replace(
+                        chunk_ids, chunks, embeddings, embedder_name
+                    )
+                self.chunk_embeddings = self.chunk_store.embeddings(chunk_ids)
+            elif chunks:
+                self.chunk_embeddings = self._normalize(self.embedder.encode(chunks))
+            if chunks:
+                if len(self.chunk_embeddings) != len(chunks):
+                    raise ValueError("Expected one embedding per grant text chunk")
+                self.chunk_owners = np.asarray(owners)
 
     @staticmethod
     def _normalize(vectors: np.ndarray) -> np.ndarray:
@@ -238,7 +284,7 @@ class Pipeline:
         *,
         as_of: date | None = None,
         top_k: int = 5,
-        min_similarity: float = 0.25,
+        min_similarity: float = DEFAULT_MIN_SIMILARITY,
     ) -> list[Recommendation]:
         if not profile.description.strip() or top_k < 1 or not 0 <= min_similarity <= 1:
             raise ValueError(
@@ -250,19 +296,34 @@ class Pipeline:
         if query.shape[0] != 1:
             raise ValueError("Expected one query embedding")
         similarities = self.store.similarities(query)
+        document_scores = np.array(
+            [similarities[str(grant["source_row"])] for grant in self.grants]
+        )
+        ranking_scores = document_scores
+        if self.chunk_weight:
+            chunk_scores = np.full(len(self.grants), -np.inf)
+            np.maximum.at(
+                chunk_scores, self.chunk_owners, (self.chunk_embeddings @ query[0])
+            )
+            chunk_scores = np.where(np.isfinite(chunk_scores), chunk_scores, document_scores)
+            ranking_scores = (
+                (1 - self.chunk_weight) * document_scores
+                + self.chunk_weight * chunk_scores
+            )
         recommendations = []
-        for grant in self.grants:
-            similarity = similarities[str(grant["source_row"])]
+        for index, grant in enumerate(self.grants):
+            similarity = document_scores[index]
+            ranking_score = ranking_scores[index]
             checks = self.checker.check(grant, profile, as_of or date.today())
             if (
                 any(check.status == "fail" for check in checks)
-                or similarity < min_similarity
+                or ranking_score < min_similarity
             ):
                 continue
             recommendations.append(
                 Recommendation(
                     program=grant["program"],
-                    score=round(100 * float(np.clip(similarity, 0, 1)), 2),
+                    score=round(100 * float(np.clip(ranking_score, 0, 1)), 2),
                     cosine_similarity=float(similarity),
                     eligibility="needs_verification",
                     checks=checks,
@@ -272,7 +333,7 @@ class Pipeline:
                 )
             )
         recommendations.sort(
-            key=lambda result: (-result.cosine_similarity, result.source_row)
+            key=lambda result: (-result.score, result.source_row)
         )
         selected = recommendations[:top_k]
         if self.generator:

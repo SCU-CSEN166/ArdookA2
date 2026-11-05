@@ -12,7 +12,12 @@ from src.ardook_extra_synthetic_data import (
     load_grants as load_synthetic_grants,
     load_profiles as load_synthetic_profiles,
 )
-from src.pipeline import LocalGenerator, OrganizationProfile, Pipeline
+from src.pipeline import (
+    DEFAULT_MIN_SIMILARITY,
+    LocalGenerator,
+    OrganizationProfile,
+    Pipeline,
+)
 from src.vector_store import VectorStore
 from src.ingest import load_grants
 from src.real_eligibility import load_checker as load_real_checker
@@ -33,6 +38,12 @@ def main() -> None:
         help="Use a generated synthetic profile by ID (synthetic dataset only).",
     )
     parser.add_argument("--top-k", type=int, default=5)
+    parser.add_argument(
+        "--min-similarity",
+        type=float,
+        default=DEFAULT_MIN_SIMILARITY,
+        help="Minimum semantic similarity from 0 to 1 (default: %(default)s).",
+    )
     parser.add_argument("--as-of", type=date.fromisoformat)
     parser.add_argument("--explain", action="store_true", help="Generate advisory fit notes.")
     args = parser.parse_args()
@@ -45,6 +56,8 @@ def main() -> None:
         parser.error("--attributes must be a JSON object")
     if args.top_k < 1:
         parser.error("--top-k must be positive")
+    if not 0 <= args.min_similarity <= 1:
+        parser.error("--min-similarity must be between 0 and 1")
 
     if args.dataset == "synthetic":
         as_of = args.as_of or REFERENCE_DATE
@@ -83,6 +96,7 @@ def main() -> None:
         profile,
         as_of=as_of,
         top_k=args.top_k,
+        min_similarity=args.min_similarity,
     )
     print(json.dumps([asdict(item) for item in recommendations], indent=2, ensure_ascii=False))
 
