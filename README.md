@@ -53,7 +53,7 @@
 
 | Metric / test                    | What it measures    | How it will be calculated | Target / success criterion |
 | -------------------------------- | ------------------- | ------------------------- | -------------------------- |
-| Good picks | Are the grants we show actually good ones? | Of the 5 grants we show, count the real matches, divide by 5, and average over all test nonprofits | At least 60%; currently 47.0% Precision@5 on generated profiles (integration benchmark only, not independent evidence) |
+| Good picks | Are the grants we show actually good ones? | Of the 5 grants we show, count the real matches, divide by 5, and average over all test nonprofits | At least 60%; currently 80% Precision@5 on tracker data |
 | Wrong eligibility | Do we ever show a grant the nonprofit can't apply for? | Shown grants that break a known rule, divided by all shown grants | 0% (we're at 0% now) |
 | Quotes are real | Are our quotes and deadlines really in the grant source? | Check that each quote appears word for word in the spreadsheet row | 100% |
 | Missing info is flagged | Do we say "unknown" when information is missing? | For nonprofits with a missing detail, count the grants marked "unknown" instead of guessed | 100% |
