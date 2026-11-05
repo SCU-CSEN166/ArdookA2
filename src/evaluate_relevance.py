@@ -7,7 +7,6 @@ import re
 from datetime import date
 
 import numpy as np
-import pandas as pd
 
 from src.ardook_extra_synthetic_data import (
     DB_PATH,
@@ -20,15 +19,10 @@ from src.ardook_extra_synthetic_data import (
 from src.ingest import load_grants
 from src.pipeline import OrganizationProfile, Pipeline
 from src.vector_store import VectorStore
+from src.real_eligibility import load_checker as load_real_checker
 
 K = 5
 TOKEN = re.compile(r"[a-z0-9]+")
-ARDOOK_PROFILE_DESCRIPTION = (
-    "Ardook is an Armenia-based social enterprise that provides flexible, "
-    "work-from-home laundry jobs and training to single mothers caring for "
-    "children with disabilities. It offers residential and commercial laundry "
-    "services, helping mothers earn income while balancing caregiving."
-)
 
 
 class KeywordEmbedder:
@@ -159,7 +153,10 @@ def _format_report(report):
         "",
         f"Applicant profile used: {report['profile']}",
         "",
-        "What counts as a match: tracker Fit rating contains Strong or Excellent.",
+        report["labels"],
+        report["label_caveat"],
+        report["eligibility_caveat"],
+        f"Applicant attributes: {json.dumps(report['attributes'], sort_keys=True)}",
         "These are team-entered ratings, not independently verified labels.",
         "Open/rolling means the tracker text says so; grant websites were not checked.",
         "Full grant eligibility is NOT measured.",
@@ -218,31 +215,31 @@ def _format_report(report):
     return "\n".join(lines)
 
 
-def evaluate_tracker():
+def evaluate_tracker(profile: OrganizationProfile, as_of: date):
     grants = load_grants()
-    as_of = date(2026, 10, 28)
-    profile = OrganizationProfile(ARDOOK_PROFILE_DESCRIPTION)
+    checker = load_real_checker(grants)
     live_candidates = [
         row
         for row in grants.to_dict("records")
-        if (pd.isna(row["deadline_date"]) or row["deadline_date"].date() >= as_of)
-        and not str(row["current_status"]).casefold().startswith("closed")
+        if not any(check.status == "fail" for check in checker.check(row, profile, as_of))
     ]
     relevant = {
         int(row["source_row"])
         for row in live_candidates
-        if any(word in str(row["fit"]).casefold() for word in ("strong", "excellent"))
+        if str(row["fit"]).strip().casefold() in {"strong", "excellent"}
     }
     return {
         "dataset": "official tracker",
         "grants": len(grants),
         "date": as_of.isoformat(),
         "profile": profile.description,
-        "labels": "Workbook Fit column: Strong/Excellent count as relevant; others do not.",
-        "label_caveat": "Team-entered ratings, not independently verified eligibility labels.",
-        "eligibility_caveat": "Full eligibility errors are not measured; no reviewed rules exist for the real grants.",
+        "attributes": profile.attributes,
+        "rule_program_count": len(checker.rules),
+        "labels": "Only exact Strong/Excellent Fit ratings count as relevant; conditional ratings do not.",
+        "label_caveat": "Tracker ratings apply only to the applicant assumed by the tracker. Confirm that the supplied profile matches that applicant; these are not independently verified eligibility labels.",
+        "eligibility_caveat": "Partial rules are transcribed from the workbook, not verified against current official sources. Missing facts and remaining requirements stay unknown; full eligibility errors are not measured.",
         "results": _run(
-            _pipelines(grants, store=MemoryStore()),
+            _pipelines(grants, checker=checker, store=MemoryStore()),
             profile,
             as_of,
             relevant,
@@ -313,6 +310,9 @@ if __name__ == "__main__":
         default="tracker",
         help="tracker (alias: real) uses the workbook Fit ratings; synthetic uses generated labels.",
     )
+    parser.add_argument("--description", help="Confirmed description of the applicant assumed by the tracker Fit ratings.")
+    parser.add_argument("--attributes", default="{}", help="JSON object of confirmed applicant facts; omit unknown facts.")
+    parser.add_argument("--as-of", type=date.fromisoformat, default=date(2026, 10, 28))
     parser.add_argument("--limit-profiles", type=int)
     parser.add_argument(
         "--format", choices=("text", "json"), default="text",
@@ -321,10 +321,19 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.limit_profiles is not None and args.limit_profiles < 1:
         parser.error("--limit-profiles must be positive")
+    if args.dataset != "synthetic":
+        if not args.description or not args.description.strip():
+            parser.error("Tracker evaluation requires --description matching the applicant assumed by the workbook Fit ratings")
+        try:
+            attributes = json.loads(args.attributes)
+        except json.JSONDecodeError as error:
+            parser.error(f"--attributes must be valid JSON: {error}")
+        if not isinstance(attributes, dict):
+            parser.error("--attributes must be a JSON object")
     result = (
         evaluate_synthetic(args.limit_profiles)
         if args.dataset == "synthetic"
-        else evaluate_tracker()
+        else evaluate_tracker(OrganizationProfile(args.description, attributes), args.as_of)
     )
     if args.format == "json":
         print(json.dumps(result, indent=2, ensure_ascii=False))

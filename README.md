@@ -41,34 +41,34 @@
 
 ### 3. Proposed data
 
-| Dataset/source | Link or access instructions                                                                                                        | Purpose    | Size / languages                  | Privacy or usage considerations |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ---------- | --------------------------------- | ------------------------------- |
-| [Ardook Data]  | [URL](https://docs.google.com/spreadsheets/d/1o_9ft5_eBtUpgBe9rj8TeUIXbJkzKGT7QQRXFxfDqdA/edit?gid=0#gid=0)  | [Training] | [reference labels for evaluation] | [Original data that was given]                         |
-| [Ardook Mock Data]  | [found in our data folder] | [Training] | [mock data for training + testing] | [Created mock data using the original data we were given]                         |
+| Dataset/source     | Link or access instructions                                                                                 | Purpose    | Size / languages                   | Privacy or usage considerations                           |
+| ------------------ | ----------------------------------------------------------------------------------------------------------- | ---------- | ---------------------------------- | --------------------------------------------------------- |
+| [Ardook Data]      | [URL](https://docs.google.com/spreadsheets/d/1o_9ft5_eBtUpgBe9rj8TeUIXbJkzKGT7QQRXFxfDqdA/edit?gid=0#gid=0) | [Training] | [reference labels for evaluation]  | [Original data that was given]                            |
+| [Ardook Mock Data] | [found in our data folder]                                                                                  | [Training] | [mock data for training + testing] | [Created mock data using the original data we were given] |
 
 - **Data preparation:** [Cleaneed + deduplication]
 - **Data limitations:** [We had limited data, so we decided to create a mock version of the original data we were given to increase the number of test cases we can train our solution with]
 
 ### 4. Proposed evaluation
 
-| Metric / test                    | What it measures    | How it will be calculated | Target / success criterion |
-| -------------------------------- | ------------------- | ------------------------- | -------------------------- |
-| Good picks | Are the grants we show actually good ones? | Of the 5 grants we show, count the real matches, divide by 5, and average over all test nonprofits | At least 60% (we're at 43% now) |
-| Wrong eligibility | Do we ever show a grant the nonprofit can't apply for? | Shown grants that break a known rule, divided by all shown grants | 0% (we're at 0% now) |
-| Quotes are real | Are our quotes and deadlines really in the grant source? | Check that each quote appears word for word in the spreadsheet row | 100% |
-| Missing info is flagged | Do we say "unknown" when information is missing? | For nonprofits with a missing detail, count the grants marked "unknown" instead of guessed | 100% |
+| Metric / test           | What it measures                                         | How it will be calculated                                                                          | Target / success criterion      |
+| ----------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------- |
+| Good picks              | Are the grants we show actually good ones?               | Of the 5 grants we show, count the real matches, divide by 5, and average over all test nonprofits | At least 60% (we're at 43% now) |
+| Wrong eligibility       | Do we ever show a grant the nonprofit can't apply for?   | Shown grants that break a known rule, divided by all shown grants                                  | 0% (we're at 0% now)            |
+| Quotes are real         | Are our quotes and deadlines really in the grant source? | Check that each quote appears word for word in the spreadsheet row                                 | 100%                            |
+| Missing info is flagged | Do we say "unknown" when information is missing?         | For nonprofits with a missing detail, count the grants marked "unknown" instead of guessed         | 100%                            |
 
 - **Evaluation examples:** We test on fake data made to look like the Ardook spreadsheet as well as on the real data
-- **Human verification:** We check a  sample of recommendations against the official grant pages. We also read each generated explanation to make sure it only says what's in the grant.
+- **Human verification:** We check a sample of recommendations against the official grant pages. We also read each generated explanation to make sure it only says what's in the grant.
 - **Failure cases to watch:** The generated explanation says something that isn't in the grant, and the fake data is cleaner than real data, so our scores on it will look better than they should.
 
 ### 5. Team responsibilities
 
-| Member   | Primary responsibility                   | Specific Weekly contribution                                                                                                                                                      | Planned next task                                                                                                  |
-| -------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Jason Wu | Build the initial RAG pipeline prototype | Completed the initial prototype, including grant data ingestion and cleaning, deterministic eligibility checks, semantic similarity scoring, and optional generated explanations. | Begin productionizing the system by scaling the pipeline to process requests concurrently for multiple nonprofits. |
-| Michael Tiburcio | Add a vector database and fake training data | Saved the grant embeddings in a vector database so they aren't rebuilt every run. Made a fake dataset modeled on the Ardook spreadsheet. | Measure how good the recommendations are on the fake data and improve them. |
-| Seerat Kakar | Evaluate recommendation rankings | Added a comparison of semantic and keyword rankings using the tracker Fit ratings and synthetic labels, plus a recommendation command. | Verify tracker ratings and improve semantic model performance. |
+| Member           | Primary responsibility                       | Specific Weekly contribution                                                                                                                                                      | Planned next task                                                                                                  |
+| ---------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Jason Wu         | Build the initial RAG pipeline prototype     | Completed the initial prototype, including grant data ingestion and cleaning, deterministic eligibility checks, semantic similarity scoring, and optional generated explanations. | Begin productionizing the system by scaling the pipeline to process requests concurrently for multiple nonprofits. |
+| Michael Tiburcio | Add a vector database and fake training data | Saved the grant embeddings in a vector database so they aren't rebuilt every run. Made a fake dataset modeled on the Ardook spreadsheet.                                          | Measure how good the recommendations are on the fake data and improve them.                                        |
+| Seerat Kakar     | Evaluate recommendation rankings             | Added a comparison of semantic and keyword rankings using the tracker Fit ratings and synthetic labels, plus a recommendation command.                                            | Verify tracker ratings and improve semantic model performance.                                                     |
 
 ---
 
@@ -92,9 +92,9 @@
 
 ### Individual contributions during that week
 
-| Member | What I personally implemented/tested | Result (worked / partly / failed) | Evidence (commit, PR, experiment) | Blocker / next step |
-| ------ | ------------------------------------ | --------------------------------- | --------------------------------- | ------------------- |
-| [Name] | [Specific contribution]              | [Status]                          | [Link]                            | [Next step]         |
+| Member   | What I personally implemented/tested                                                                                                                                                                                                                                    | Result (worked / partly / failed) | Evidence (commit, PR, experiment) | Blocker / next step                                                                                     |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Jason Wu | I updated the real data evaluator to use an explicit applicant profile and integrated workbook based eligibility rules for 6 programs into evaluations and recommendations. I also changed how conditional fit-labels were handled and CLI commands worked as intended. | Finished                          |                                   | Continue to iterate on the pipeline and make sure that it's as accurate as possible for recommendations |
 
 ---
 

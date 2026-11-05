@@ -14,6 +14,8 @@ from src.ardook_extra_synthetic_data import (
 )
 from src.pipeline import LocalGenerator, OrganizationProfile, Pipeline
 from src.vector_store import VectorStore
+from src.ingest import load_grants
+from src.real_eligibility import load_checker as load_real_checker
 
 
 def main() -> None:
@@ -67,8 +69,8 @@ def main() -> None:
         if not args.description:
             parser.error("--description is required")
         profile = OrganizationProfile(args.description, attributes)
-        grants = None
-        checker = None
+        grants = load_grants()
+        checker = load_real_checker(grants)
         store = VectorStore()
 
     pipeline = Pipeline(
