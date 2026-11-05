@@ -45,6 +45,7 @@
 | ------------------ | ----------------------------------------------------------------------------------------------------------- | ---------- | ---------------------------------- | --------------------------------------------------------- |
 | [Ardook Data]      | [URL](https://docs.google.com/spreadsheets/d/1o_9ft5_eBtUpgBe9rj8TeUIXbJkzKGT7QQRXFxfDqdA/edit?gid=0#gid=0) | [Training] | [reference labels for evaluation]  | [Original data that was given]                            |
 | [Ardook Mock Data] | [found in our data folder]                                                                                  | [Training] | [mock data for training + testing] | [Created mock data using the original data we were given] |
+| [Ardook Messy Mock Data] | [found in our data folder]                                                                            | [Training] | [more mock data, but messy (blanks, typos, duplicates, vague requirements)] | [Created mock data using the original data we were given] |
 
 - **Data preparation:** [Cleaneed + deduplication]
 - **Data limitations:** [We had limited data, so we decided to create a mock version of the original data we were given to increase the number of test cases we can train our solution with]
