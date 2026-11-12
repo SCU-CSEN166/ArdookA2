@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from src.paths import DEFAULT_WORKBOOK
+
 
 COLUMNS = {
     "Priority / Deadline Order": "priority_order",
@@ -59,7 +61,7 @@ def clean_grants(raw: pd.DataFrame) -> pd.DataFrame:
     return grants.reset_index(drop=True)
 
 
-def load_grants(path: str | Path = "Ardook_data.xlsx") -> pd.DataFrame:
+def load_grants(path: str | Path = DEFAULT_WORKBOOK) -> pd.DataFrame:
     """Read only Grant Tracker; Summary contains aggregates, not opportunities."""
     raw = pd.read_excel(
         path, sheet_name="Grant Tracker", engine="openpyxl", keep_default_na=False
@@ -69,7 +71,7 @@ def load_grants(path: str | Path = "Ardook_data.xlsx") -> pd.DataFrame:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("workbook", nargs="?", default="Ardook_data.xlsx")
+    parser.add_argument("workbook", nargs="?", default=str(DEFAULT_WORKBOOK))
     args = parser.parse_args()
     data = load_grants(args.workbook)
     print(f"Loaded {len(data)} opportunities; {data.deadline_date.notna().sum()} exact deadlines.")
