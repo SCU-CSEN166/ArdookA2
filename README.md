@@ -90,9 +90,6 @@ make tracker DESCRIPTION="Ardook is an early-stage, woman-led U.S. startup build
 make recommend DESCRIPTION="Ardook is an early-stage, woman-led U.S. startup building AI, physical-AI and data products with a social-impact mission."
 python -m src.evaluate_safety
 ```
-- Optional DeepSeek grant-detail extraction (requires a CUDA GPU):
-  `make deepseek-extraction` (Wave setup required), or run
-  `python -m src.recommend --dataset synthetic --profile-id 1 --deepseek-extract`.
 - **Model(s) and data actually used:**
   - Models: [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) turns grants and organization descriptions into embeddings, which are stored in ChromaDB. [FLAN-T5-small](https://huggingface.co/google/flan-t5-small) writes the short explanation for each recommendation and does not decide eligibility.
   - Optional DeepSeek-R1-Distill-Qwen-1.5B extraction copies grant details from the spreadsheet. The extractor validates them against their source fields and can add fit-related details to ranking text. It has not yet shown a visible matching improvement.
