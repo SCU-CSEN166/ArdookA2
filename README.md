@@ -162,17 +162,31 @@ training inputs. Source corrections require a new dataset version and review.
 
 ### Implementation status
 
-- **What runs end-to-end now?** [Describe exactly.]
-- **How to run it:** [Commands, dependencies, configuration; refer to Setup below.]
-- **Model(s) and data actually used:** [Names, versions, links, and any changes from the plan.]
-- **Example 1:** Input: [non-sensitive example] → Output: [result]
-- **Example 2:** Input: [non-sensitive example] → Output: [result]
+- **What runs end-to-end now?** The system takes an organization's description and attributes, removes grants that fail a known eligibility rule, ranks the rest with semantic search and returns the top 5 grants. Each result has a score, its eligibility checks, quotes from the grant row and a source link. Eligibility is always shown as "needs verification", because the system never claims an organization definitely qualifies. Grant embeddings are saved in a Chroma vector store, so they are not rebuilt on every run.
+- **How to run it:**
+```
+cd ArdookA2
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+make synthetic
+make tracker DESCRIPTION="Ardook is an early-stage, woman-led U.S. startup building AI, physical-AI and data products with a social-impact mission."
+make recommend DESCRIPTION="Ardook is an early-stage, woman-led U.S. startup building AI, physical-AI and data products with a social-impact mission."
+python -m src.evaluate_safety
+```
+- **Model(s) and data actually used:**
+  - Models: [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) turns grants and organization descriptions into embeddings, which are stored in ChromaDB. [FLAN-T5-small](https://huggingface.co/google/flan-t5-small) writes the short explanation for each recommendation and does not decide eligibility.
+  - Data: the real Ardook grant tracker, a fake dataset of 150 grants and 200 organizations, and a messy copy of the fake data with blanks, typos and duplicates.
+- **Example 1:** Input: "Ardook is an early-stage, woman-led U.S. startup building AI, physical-AI and data products with a social-impact mission." → Output: NVIDIA Inception, Oasis Women in AI Pitch Competition, AI for Good Innovation Factory, Humanity AI, Google for Startups Accelerator (3 of 5 rated Strong/Excellent)
+- **Example 2:** Input: "Our nonprofit works on rapid rehousing and eviction prevention for families and is looking for early funding to grow." → Output: Marigold Foundry Fund, Ember Signal Grant, Atlas Impact Initiative, Orchard Bridge Initiative, Cedar Community Program (all marked "needs verification")
 
 ### Attempts and outcomes
 
 | Attempt / change | Worked? (Yes / Partly / No) | Evidence (output, metric, link) | What we learned / next step |
 | ---------------- | --------------------------- | ------------------------------- | --------------------------- |
-| [Attempt]        | [Status]                    | [Evidence]                      | [Learning]                  |
+| Semantic search vs keyword matching on fake data | Yes | Precision@5: 47.0% vs 36.9% | Semantic search did better, but it's still under our 60% goal |
+| Semantic search on the real tracker | Partly | 3 of 5 good picks (60%), while keyword matching got 4 of 5 (80%) | Keywords caught words like "AI" and "women" that semantic search missed. Next, try using both together |
+| Eligibility rules from the workbook | Yes | 0 ineligible grants shown | The rules keep wrong grants out, so ranking can just focus on fit |
+| Testing on the messy data | Partly | All 20 safety checks passed, but 65 organizations got the same grant twice in their top 5 | Duplicate listings take up spots. Next, remove duplicates |
 
 ### Individual contributions during that week
 
@@ -189,23 +203,31 @@ training inputs. Source corrections require a new dataset version and review.
 
 ### Evaluation setup
 
-- **Development data:** [Source, size, selection, annotations, link or access instructions]
-- **Metrics and rationale:** [Why these metrics reflect the intended use]
-- **Comparison:** [Baseline versus current approach, if different]
+- **Development data:** We tested on three sets. The fake dataset has 150 grants and 200 organizations, labeled by the same rules our eligibility checker uses. The messy dataset is a copy of it with blanks, typos, vague descriptions and duplicate listings. The third set is the Ardook grant data we were given, which already rates each grant's fit, and we count Strong or Excellent as a good pick. Jason also prepared 160 organization–grant pairs for people to label, but they aren't labeled yet.
+- **Metrics and rationale:** We use Precision@5 (how many of the 5 grants we show are good matches) and Recall@5 (how many of all the good grants made it into our top 5). A user only sees 5 recommendations, so those 5 are what matter. We also run 20 safety checks, like never showing a grant the organization can't apply for and never showing the same grant twice.
+- **Comparison:** The baseline is our Week 6 system, which used semantic search only. We added one change at a time and measured each on the same data.
 
-| System / version | Metric 1 | Metric 2 | Notes   |
-| ---------------- | -------: | -------: | ------- |
-| Baseline         |  [Value] |  [Value] | [Notes] |
-| Current          |  [Value] |  [Value] | [Notes] |
+| System / version | Precision@5 | Recall@5 | Notes |
+| ---------------- | ----------: | -------: | ----- |
+| Keyword matching only | 36.9% | 29.1% | Starting point from Week 5 |
+| Week 6 baseline (semantic search) | 47.0% | 37.7% | Better than keywords, but under our 60% goal |
+| + mix keyword matching into the ranking | 53.9% | 41.0% | Biggest gain of the week |
+| + remove duplicate listings | 53.9% | 41.0% | Same score on clean data, but on messy data duplicates in the top 5 went from 65 organizations to 0 |
+| Tried 5 other embedding models and a reranker | about the same | | No real gain, so we kept all-MiniLM-L6-v2 |
+| Week 6 baseline, given Ardook data | 60.0% | 37.5% | 3 of 5 good picks |
+| Current, given Ardook data | 80.0% | 50.0% | 4 of 5 good picks |
 
 ### Successes, failures, and interpretation
 
 | Example / category | Expected behavior | Actual behavior | Success or failure? | Likely reason |
 | ------------------ | ----------------- | --------------- | ------------------- | ------------- |
-| [Case]             | [Expected]        | [Observed]      | [Status]            | [Hypothesis]  |
+| Ardook: "early-stage, woman-led U.S. startup building AI, physical-AI and data products with a social-impact mission" | Mostly Strong/Excellent grants in the top 5 | Went from 3 to 4 good picks. Two Moderate grants dropped out and two Excellent ones came in | Success | Keyword matching catches exact words like "AI" and "woman-led" that semantic search missed |
+| "free clinics and care navigation for uninsured patients" (messy data) | Each grant shows up once | Before, "Quill Signal Grant" and "quill signal grant" took 2 of the 5 spots. Now it shows once | Success | We now group listings that are almost the same and only keep one |
+| "Our mission is to make things better." (messy data) | Say there isn't enough information, or return weak matches | Still returns 5 grants, and only 1 is a good match | Failure | There's nothing in the description to match on, and the system doesn't flag vague input yet |
+| "tutoring and digital skills training for underserved students" (messy data) | Education grants in the top 5 | 0 of 5 are good matches | Failure | The messy grant text is blank or full of typos, so there isn't enough clean text to match the organization to the right grants |
 
-- **What improved?** [Evidence]
-- **What did not improve?** [Evidence]
+- **What improved?** Precision@5 went from 47.0% to 53.9% on the fake data and from 60% to 80% on the given Ardook data. Duplicate listings in the top 5 dropped from 65 organizations to 0, and all 20 safety checks still pass.
+- **What did not improve?** The messy data is still only about 15% Precision@5. Vague descriptions like "make things better" still get 5 confident-looking results. Switching embedding models didn't help either.
 - **Next experiment (Jason):** Complete and validate human relevance and eligibility labels for the 160 prepared organization–grant pairs, then train the logistic regression baseline and PyTorch classifier using the fixed organization-level splits. Compare classification performance using held-out macro-F1 and per-class precision/recall. Before integrating either classifier, compare its ranking with the existing recommendation system using Precision@5 on the same reviewed candidate sets, keeping eligibility checks separate. Use validation data for model selection and reserve test data for the final comparison. The labeling workflow and training scripts are implemented; human labeling, classifier evaluation, and evidence of improved recommendations are still pending.
 
 ### Individual contributions during that week
