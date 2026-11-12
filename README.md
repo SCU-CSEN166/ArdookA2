@@ -162,23 +162,26 @@ training inputs. Source corrections require a new dataset version and review.
 
 ### Implementation status
 
-- **What runs end-to-end now?** [Describe exactly.]
-- **How to run it:** [Commands, dependencies, configuration; refer to Setup below.]
-- **Model(s) and data actually used:** [Names, versions, links, and any changes from the plan.]
-- **Example 1:** Input: [non-sensitive example] → Output: [result]
-- **Example 2:** Input: [non-sensitive example] → Output: [result]
+- **What runs end-to-end now?** The system reads grant records and an organization profile, checks deadlines and the eligibility rules available for selected programs, ranks grants by semantic similarity, and returns recommendations with scores, source links, evidence, and unknown checks. An optional local model can generate advisory fit notes; it does not determine eligibility.
+- **How to run it:** Install `requirements.txt`, then use `make recommend-synthetic` or `make recommend DESCRIPTION="..." ATTRIBUTES='{"entity_type":"nonprofit"}'`. Add `--deepseek-extract` to the Python command to extract grant details.
+- **Models:** The default ranker uses MiniLM on CPU. DeepSeek extraction is optional; it only accepts exact quotes from the grant text and caches the results.
+- **Example 1:** Input: `make recommend-synthetic` (generated profile 1: a nonprofit in India seeking early funding for rapid rehousing and eviction prevention). → Output: the top result is the synthetic Marigold Foundry Fund, scored 54.19, with eligibility marked `needs_verification`.
+- **Example 2:** Input: `make synthetic` (200 generated profiles evaluated against 150 generated grants). → Output: semantic ranking averages 47.0% Precision@5 and 37.7% Recall@5; the keyword baseline averages 36.9% Precision@5 and 29.1% Recall@5. These are synthetic integration results, not real-world accuracy evidence.
 
 ### Attempts and outcomes
 
 | Attempt / change | Worked? (Yes / Partly / No) | Evidence (output, metric, link) | What we learned / next step |
 | ---------------- | --------------------------- | ------------------------------- | --------------------------- |
-| [Attempt]        | [Status]                    | [Evidence]                      | [Learning]                  |
+| DeepSeek-R1-Distill-Qwen-1.5B extracts grant fields, added as ranking text | No | Wave RTX PRO 6000: tracker P@5 60% → 60%; synthetic 47.0% → 45.5% (22 profiles worse, 8 better). [notebook](notebooks/deepseek_ranking_evaluation.ipynb) | Per-field validation raised usable extractions from 8/37 to 37/37, but the values repeat workbook text already embedded, so they add noise. Kept opt-in. |
+| Larger embedding models (bge-large, e5-large, Qwen3-Embedding 0.6B/4B) | Partly | Qwen3-Embedding-4B: synthetic test P@5 60.2% vs 48.4% (MiniLM). [notebook](notebooks/ranking_techniques_evaluation.ipynb) | Best zero-shot first stage; no gain on the tracker. |
+| Cross-encoder reranker (bge-reranker-v2-m3) | Partly | Synthetic test 57.0%; tracker 40% | Better than MiniLM on synthetic, worse on the tracker. |
+| Zero-shot LLM fit judge, Qwen2.5-7B and 32B | Partly | Synthetic test 51.8% (7B), 52.8% (32B) | Model size did not help without task-specific training. |
 
 ### Individual contributions during that week
 
 | Member           | What I personally implemented/tested                                                                                                                                                                                                                                    | Result (worked / partly / failed) | Evidence (commit, PR, experiment)        | Blocker / next step                                                                                     |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Seerat Kakar     | I updated the ranking to compare an organization’s profile with the whole grant and its individual requirements. It now reuses saved embeddings and lets us set a minimum similarity score. I also added commands to run recommendations and compare them with the keyword baseline. | Worked | `bd643cae2a584f40487374cfdb4179c8013260ac` | Improve ranking performance by refining how grant relevance scores are calculated. |
+| Seerat Kakar     | I updated the ranking to compare an organization’s profile with the whole grant and its individual requirements. It now reuses saved embeddings and lets us set a minimum similarity score. I also added commands to run recommendations and compare them with the keyword baseline. | Worked | `bd643cae2a584f40487374cfdb4179c8013260ac` | Evaluate whether source-grounded details extracted by DeepSeek improve recommendation rankings over the current model. |
 | Jason Wu | I updated the real data evaluator to use an explicit applicant profile and integrated workbook based eligibility rules for 6 programs into evaluations and recommendations. I also changed how conditional fit-labels were handled and CLI commands worked as intended. | Finished                          | 8ea4a922d27308a331ad788780288004b504f6cc | Continue to iterate on the pipeline and make sure that it's as accurate as possible for recommendations |
 | Michael Tiburcio  |  I updated our data and focused on making more inconsistent data to test whether or not our current pipelines and evaluations can flag when it is unsure whether the information is correct or not. I am also working on creating a reasoning feature, so it tells us why it is unsure about a recommendation (not enough information or too much guessing | Finished |  aad000250db026deb2ad6c7354e2027ece0916f2 | Continue to iterate on the reasoning part and get to a place where our model can be more consistent regardless of whether our data is clean or not |
 ---
@@ -189,30 +192,32 @@ training inputs. Source corrections require a new dataset version and review.
 
 ### Evaluation setup
 
-- **Development data:** [Source, size, selection, annotations, link or access instructions]
-- **Metrics and rationale:** [Why these metrics reflect the intended use]
-- **Comparison:** [Baseline versus current approach, if different]
+- **Development data:** Synthetic: 150 grants × 200 profiles; messy synthetic: 135 grants × 200 profiles; real: the 37-grant Ardook tracker with one applicant profile, evaluated as of 2026-10-28.
+- **Metrics and rationale:** Precision@5 and Recall@5 against `match` labels (synthetic) or Strong/Excellent tracker ratings, because a grants team reads the top five. We also report the ceiling: the best Precision@5 any ranking can reach when some profiles have fewer than five open relevant grants (79.4% on synthetic test, 34.7% messy).
+- **Comparison:** Ranking experiments were compared with the default MiniLM pipeline (0.20 threshold).
 
 | System / version | Metric 1 | Metric 2 | Notes   |
 | ---------------- | -------: | -------: | ------- |
-| Baseline         |  [Value] |  [Value] | [Notes] |
-| Current          |  [Value] |  [Value] | [Notes] |
+| Baseline: MiniLM (default) | 48.4% synthetic test | 11.1% messy | Tracker 60% (3/5) |
 
 ### Successes, failures, and interpretation
 
 | Example / category | Expected behavior | Actual behavior | Success or failure? | Likely reason |
 | ------------------ | ----------------- | --------------- | ------------------- | ------------- |
-| [Case]             | [Expected]        | [Observed]      | [Status]            | [Hypothesis]  |
+| Synthetic profile, wording not seen in training | Relevant grants in top five | 78.1% P@5, equal to the ceiling | Success | Judge learned the focus/eligibility rules behind the labels |
+| Messy grants (typos, blanks, duplicates) | Robust ranking | 23.8% P@5 of a 34.7% ceiling | Partial | Noisy text and `needs_review` pairs |
 
-- **What improved?** [Evidence]
-- **What did not improve?** [Evidence]
+- **What improved?** Larger embedding models improved synthetic ranking, but did not improve results on the real tracker.
+- **What did not improve?** The real tracker: no new method beats the default MiniLM ranker (one applicant, so each grant is 20 points). DeepSeek detail extraction also did not improve ranking.
 - **Next experiment (Jason):** Complete and validate human relevance and eligibility labels for the 160 prepared organization–grant pairs, then train the logistic regression baseline and PyTorch classifier using the fixed organization-level splits. Compare classification performance using held-out macro-F1 and per-class precision/recall. Before integrating either classifier, compare its ranking with the existing recommendation system using Precision@5 on the same reviewed candidate sets, keeping eligibility checks separate. Use validation data for model selection and reserve test data for the final comparison. The labeling workflow and training scripts are implemented; human labeling, classifier evaluation, and evidence of improved recommendations are still pending.
+- **Next experiment (team):** Collect founder-reviewed fit labels for additional real applicant profiles. Current real-tracker comparisons use very few profiles, and provisional laundry labels are not ground truth.
 
 ### Individual contributions during that week
 
 | Member | Work completed  | Result (worked / partly / failed) | Evidence | Next step   |
 | ------ | --------------- | --------------------------------- | -------- | ----------- |
 | Jason Wu | I created a human-labeling workflow with 160 organization–grant pairs using eight fictional applicant profiles and real tracker records. I added separate relevance and eligibility labels, review validation, and organization-level training/validation/test splits. I also implemented a logistic regression baseline and a PyTorch classifier training script with validation-based checkpoint selection and held-out evaluation. | Partly: the review dataset and training workflows are implemented, but the examples still need human labels. No improvement in recommendation quality has been established yet. | [Review workbook](outputs/ranking-review/ranking_review.xlsx), [dataset preparation](src/prepare_ranking_review.py), [review validation and baseline](src/ranking_classifier.py), [PyTorch training](src/train_pytorch.py) | Complete and validate human reviews, train the classifiers, and compare held-out relevance results before integrating a model into recommendations. |
+| Seerat Kakar | I added a DeepSeek feature that extracts grant details from the spreadsheet. It checks extracted details against the original text and can use them to help rank grants. | Partly: no visible improvement in matching results yet. | `src/deepseek_extractor.py`, `src/recommend.py` | Evaluate whether DeepSeek-extracted details improve matching, then add a LoRA adapter to score candidate fit. |
 
 ---
 
