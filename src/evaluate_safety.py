@@ -52,7 +52,7 @@ def _norm(value) -> str:
 def _expect_unknown(rule, value) -> bool:
     """Mirror EligibilityChecker: a rule can be decided only from a usable attribute value."""
     if rule.operator == "in":
-        return not isinstance(value, str)
+        return not isinstance(value, str) or not value.strip()
     return isinstance(value, bool) or not isinstance(value, (int, float)) or not np.isfinite(value)
 
 

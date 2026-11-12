@@ -194,7 +194,7 @@ class EligibilityChecker:
         for rule in self.rules.get(grant["program"], []):
             value = profile.attributes.get(rule.attribute)
             result = "unknown"
-            if rule.operator == "in" and isinstance(value, str):
+            if rule.operator == "in" and isinstance(value, str) and value.strip():
                 passed = value.strip().casefold() in {
                     item.strip().casefold() for item in rule.value
                 }
