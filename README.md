@@ -8,99 +8,6 @@
 
 > **How to use this README:** Maintain this single file throughout the project. Complete the Week 5 project plan first, then update the appropriate weekly section before each milestone. Be specific and honest: describe what you attempted, what worked, what did not work, and what evidence supports your conclusions. For every week, document each member's actual contribution. If a task was not completed, explain the blocker and next step. Do not include private or sensitive data in this public README.
 
-## Remember - Best Practices
-
-### Human-reviewed relevance classifier pilot
-
-The review workbook is `outputs/ranking-review/ranking_review.xlsx`. Its **Guide**
-tab defines the labels; fill the amber columns in **Reviews**. The 160 pairs use
-eight explicitly fictional applicants and the real tracker snapshot dated
-November 12, 2026. Labels are blank until a human reviews them. Grant websites
-have not been verified for this dataset.
-
-Judge relevance as `strong_fit`, `possible_fit`, `poor_fit`, or
-`insufficient_information`. Record eligibility separately as `ineligible`,
-`unknown`, or `no_known_conflict`; the last value does not confirm eligibility.
-An expired grant can still have strong mission fit. Include a reviewer, review
-date, rationale, and an exact supplied grant quote when marking ineligible.
-Missing facts are unknown, not a mismatch. First have two reviewers independently
-label 20 pairs in separate copies, discuss differences, and record agreed labels
-in one canonical workbook. Do not manufacture labels to meet training thresholds.
-
-The frozen source dataset is `data/ranking_review/pairs.jsonl`, with workbook
-hash, source rows, source URLs and reference date. Each organization has ten
-keyword-selected and ten randomly selected candidates, shuffled for review.
-Existing tracker Fit ratings and applicant-specific advice are withheld.
-Profiles are assigned to train (100 pairs), validation (20), or test (40)
-before labeling. Organizations never cross splits; grants can appear in multiple
-splits. Keep the test labels out of model tuning. This small sample cannot measure
-generalization to new grants or full-catalog recall.
-
-```bash
-# Use the existing project environment; install requirements if needed.
-.venv/bin/python -m pip install -r requirements.txt
-
-# Check review progress and label validity without training.
-.venv/bin/python -m src.train_ranking_classifier \
-  --reviews outputs/ranking-review/ranking_review.xlsx --validate-only
-
-# After human review, train and evaluate the offline baseline.
-.venv/bin/python -m src.train_ranking_classifier \
-  --reviews outputs/ranking-review/ranking_review.xlsx
-
-```
-
-Training requires at least 30 reviewed training pairs with five examples of each
-of the three relevance classes, plus ten reviewed pairs in each held-out split.
-These are starter checks, not evidence that the dataset is large enough. Review
-all 160 where possible; insufficient-information rows are excluded from training.
-If a class is scarce, collect more examples rather than changing truthful labels.
-
-The model uses TF-IDF features for organization and grant text, shared terms and
-text differences, with balanced logistic regression. Vocabulary is fitted only
-on training data. Reviewer notes, human labels, split IDs, existing Fit ratings
-and eligibility decisions are excluded from features. Outputs are
-`models/relevance_v1/model.joblib` and `report.json`, including held-out macro-F1,
-per-class metrics, confusion matrices and a majority-class baseline. Use a new
-`--output` directory for each experiment; existing runs are never overwritten.
-Only load model files you created or trust.
-
-This is an offline relevance experiment; it does not change recommendations or
-replace deterministic eligibility checks. Compare its ranking performance with
-the existing pipeline before integrating it. No trained model or quality claim
-is available until actual human reviews are supplied.
-
-A minimal PyTorch alternative uses the same review data and TF-IDF pair features
-with a 64-unit hidden layer and three relevance outputs. It runs on CPU, selects
-the best epoch by validation macro-F1, and evaluates the test set afterward:
-
-```bash
-.venv/bin/python -m src.train_pytorch \
-  --reviews outputs/ranking-review/ranking_review.xlsx --epochs 20
-```
-
-It saves `model.pt`, `features.joblib`, and `report.json` in `models/pytorch_v1/`.
-The checkpoint includes architecture dimensions and label order. Reload it with
-`torch.load(path, weights_only=True)`, construct `build_model(input_dim, hidden_dim)`
-from `src.train_pytorch`, load its `state_dict`, and call `model.eval()`. Transform
-new `pair_texts` with the saved features before passing float32 tensors to the model.
-This is starter code for the small review dataset, not a demonstrated improvement
-over logistic regression. Human reviews are required before either model can train.
-
-To reproduce the source sample in a new file (never overwrite reviewed data):
-`python -m src.prepare_ranking_review --as-of 2026-11-12 --output /tmp/pairs.jsonl`.
-The same workbook and profiles produce the same sample. The workbook joins labels
-to frozen records by `pair_id`; editing displayed source text does not change the
-training inputs. Source corrections require a new dataset version and review.
-
-### Data access and privacy
-
-[Explain where authorized data can be accessed. Do not commit personal information, private WhatsApp exports, API keys, credentials, or restricted grant/application records. Use synthetic or anonymized examples in the README.]
-
-### Known limitations
-
-[Keep a current list of what the system cannot reliably do.]
-
 ## Week 5 — Scope: Project Plan
 
 **Deliverable during Week 6 Lab:** A project plan (write in this README file) describing your problem formulation, proposed approach, each team member's responsibilities, proposed baseline models with Hugging Face links, proposed evaluation metrics, proposed data with links, and goals for each week.
@@ -173,8 +80,12 @@ make tracker DESCRIPTION="Ardook is an early-stage, woman-led U.S. startup build
 make recommend DESCRIPTION="Ardook is an early-stage, woman-led U.S. startup building AI, physical-AI and data products with a social-impact mission."
 python -m src.evaluate_safety
 ```
+- Optional DeepSeek grant-detail extraction (requires a CUDA GPU):
+  `make deepseek-extraction` (Wave setup required), or run
+  `python -m src.recommend --dataset synthetic --profile-id 1 --deepseek-extract`.
 - **Model(s) and data actually used:**
   - Models: [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) turns grants and organization descriptions into embeddings, which are stored in ChromaDB. [FLAN-T5-small](https://huggingface.co/google/flan-t5-small) writes the short explanation for each recommendation and does not decide eligibility.
+  - Optional DeepSeek-R1-Distill-Qwen-1.5B extraction copies grant details from the spreadsheet. The extractor validates them against their source fields and can add fit-related details to ranking text. It has not yet shown a visible matching improvement.
   - Data: the real Ardook grant tracker, a fake dataset of 150 grants and 200 organizations, and a messy copy of the fake data with blanks, typos and duplicates.
 - **Example 1:** Input: "Ardook is an early-stage, woman-led U.S. startup building AI, physical-AI and data products with a social-impact mission." → Output: NVIDIA Inception, Oasis Women in AI Pitch Competition, AI for Good Innovation Factory, Humanity AI, Google for Startups Accelerator (3 of 5 rated Strong/Excellent)
 - **Example 2:** Input: "Our nonprofit works on rapid rehousing and eviction prevention for families and is looking for early funding to grow." → Output: Marigold Foundry Fund, Ember Signal Grant, Atlas Impact Initiative, Orchard Bridge Initiative, Cedar Community Program (all marked "needs verification")
@@ -275,6 +186,7 @@ The script uses CPU, performs no model downloads, and refuses to overwrite an ex
 | ------ | --------------- | --------------------------------- | -------- | ----------- |
 | Jason Wu | I created the 160-pair human-labeling workflow and logistic regression/PyTorch training scripts. I then implemented and ran six classifier configurations on the existing synthetic data, holding out both organizations and grants. I recorded accuracy, macro-F1, per-class metrics, confusion matrices, and representative failures. | Worked for the synthetic experiment: the validation-selected MiniLM-L6 + PyTorch classifier achieved 85.7% test accuracy and 0.574 macro-F1, but only 24.1% match recall. Human reviews and real-world improvement remain unverified. | [Review workbook](outputs/ranking-review/ranking_review.xlsx), [model comparison script](src/compare_models.py), [full results](results/model_comparison_v1/report.json), [test predictions](results/model_comparison_v1/test_predictions.json) | Complete human-reviewed evaluation, investigate missed matches and entity-rule errors, and compare ranking performance before integration. |
 | Michael Tiburcio | I improved the vector store so now it only re-embeds grants that changed and also made ranking based on semantic search with keyword matching and also now ignoring duplicate listings. | Worked: the precision went from 47.0% to 53.9% on our fake data and from 60% to 80% on the real tracker. | PR #6 (feature/vector-store-embeddings) | Fine-tune the embedding model on Jason's human labels once they're done. |
+| Seerat Kakar | I added a DeepSeek feature that extracts grant details from the spreadsheet. It checks extracted details against the original text and can use them to help rank grants. | Partly: no visible improvement in matching results yet. | `src/deepseek_extractor.py`, `src/recommend.py` | Evaluate whether DeepSeek-extracted details improve matching, then add a LoRA adapter to score candidate fit. |
 
 ---
 
