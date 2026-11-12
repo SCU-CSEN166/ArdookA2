@@ -1,0 +1,4 @@
+system,tp,fp,fn,tn,accuracy,precision,recall,f1
+A_pipeline_rules,0,1,1,8,0.80,0.00,0.00,0.00
+A_no_rules,0,5,1,4,0.40,0.00,0.00,0.00
+B_pytorch,0,0,1,9,0.90,0.00,0.00,0.00
