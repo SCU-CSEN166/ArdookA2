@@ -230,6 +230,7 @@ class Recommendation:
     source_row: int
     source_url: str
     generated_note: str | None = None
+    extracted_details: dict[str, str | None] | None = None
 
 
 class Pipeline:
@@ -258,6 +259,8 @@ class Pipeline:
         read_only: bool = False,
         dedupe_threshold: float | None = DEFAULT_DEDUPE_THRESHOLD,
         workbook: str | Path = DEFAULT_WORKBOOK,
+        additional_chunks: dict[int, list[str]] | None = None,
+        extracted_details: dict[int, dict[str, str | None]] | None = None,
     ):
         if not 0 <= chunk_weight <= 1:
             raise ValueError("chunk_weight must be between 0 and 1")
@@ -278,6 +281,35 @@ class Pipeline:
         }
         if unknown:
             raise ValueError(f"Rules reference unknown programs: {sorted(unknown)}")
+        self.additional_chunks = additional_chunks or {}
+        source_rows = {int(grant["source_row"]) for grant in self.grants}
+        unknown_chunk_rows = self.additional_chunks.keys() - source_rows
+        if unknown_chunk_rows:
+            raise ValueError(
+                f"Additional chunks reference unknown source rows: {sorted(unknown_chunk_rows)}"
+            )
+        self.extracted_details = extracted_details or {}
+        unknown_detail_rows = self.extracted_details.keys() - source_rows
+        if unknown_detail_rows:
+            raise ValueError(
+                f"Extracted details reference unknown source rows: {sorted(unknown_detail_rows)}"
+            )
+        for source_row, details in self.extracted_details.items():
+            if not isinstance(details, dict) or any(
+                value is not None
+                and (not isinstance(value, str) or not value.strip())
+                for value in details.values()
+            ):
+                raise ValueError(
+                    f"Extracted details for source row {source_row} must be strings or None"
+                )
+        for source_row, chunks in self.additional_chunks.items():
+            if not isinstance(chunks, list) or not all(
+                isinstance(chunk, str) and chunk.strip() for chunk in chunks
+            ):
+                raise ValueError(
+                    f"Additional chunks for source row {source_row} must be non-empty strings"
+                )
         self.store = store or VectorStore()
         documents = [
             "\n".join(f"{key}: {text(grant[key])}" for key in self.RETRIEVAL_FIELDS)
@@ -322,6 +354,13 @@ class Pipeline:
                         chunk_ids.append(f"{grant['source_row']}:{chunk_index}")
                         owners.append(index)
                         chunk_index += 1
+                for detail in self.additional_chunks.get(
+                    int(grant["source_row"]), []
+                ):
+                    chunks.append(detail)
+                    chunk_ids.append(f"{grant['source_row']}:{chunk_index}")
+                    owners.append(index)
+                    chunk_index += 1
             if chunks:
                 self.chunk_store = self.store.child("chunks")
                 self.chunk_store.sync(
@@ -410,6 +449,12 @@ class Pipeline:
                 or relevance[index] < min_similarity
             ):
                 continue
+            evidence = {key: text(grant[key]) for key in self.EVIDENCE_FIELDS}
+            extracted_details = self.additional_chunks.get(
+                int(grant["source_row"]), []
+            )
+            if extracted_details:
+                evidence["deepseek_extracted_details"] = "; ".join(extracted_details)
             recommendations.append(
                 Recommendation(
                     program=grant["program"],
@@ -417,9 +462,12 @@ class Pipeline:
                     cosine_similarity=float(similarity),
                     eligibility="needs_verification",
                     checks=checks,
-                    evidence={key: text(grant[key]) for key in self.EVIDENCE_FIELDS},
+                    evidence=evidence,
                     source_row=int(grant["source_row"]),
                     source_url=text(grant["official_source"]),
+                    extracted_details=self.extracted_details.get(
+                        int(grant["source_row"])
+                    ),
                 )
             )
         recommendations.sort(
