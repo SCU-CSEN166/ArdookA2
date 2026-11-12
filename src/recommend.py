@@ -4,6 +4,7 @@ import argparse
 from dataclasses import asdict
 from datetime import date
 import json
+import sys
 
 from src.ardook_extra_synthetic_data import (
     DB_PATH as SYNTHETIC_DB,
@@ -11,6 +12,13 @@ from src.ardook_extra_synthetic_data import (
     load_checker as load_synthetic_checker,
     load_grants as load_synthetic_grants,
     load_profiles as load_synthetic_profiles,
+)
+from src.deepseek_extractor import (
+    DEFAULT_MODEL as DEFAULT_DEEPSEEK_MODEL,
+    RANKING_FIELDS as DEEPSEEK_RANKING_FIELDS,
+    DeepSeekGrantExtractor,
+    GrantDetailExtractionError,
+    grant_source_text,
 )
 from src.pipeline import (
     DEFAULT_MIN_SIMILARITY,
@@ -46,6 +54,21 @@ def main() -> None:
     )
     parser.add_argument("--as-of", type=date.fromisoformat)
     parser.add_argument("--explain", action="store_true", help="Generate advisory fit notes.")
+    parser.add_argument(
+        "--deepseek-extract",
+        action="store_true",
+        help="Locally extract source-grounded grant details with DeepSeek and use them as extra ranking text.",
+    )
+    parser.add_argument(
+        "--deepseek-model",
+        default=DEFAULT_DEEPSEEK_MODEL,
+        help="Hugging Face model ID used with --deepseek-extract.",
+    )
+    parser.add_argument(
+        "--deepseek-cache",
+        default=".cache/deepseek_grant_details.json",
+        help="Local JSON cache path for validated DeepSeek extractions.",
+    )
     args = parser.parse_args()
 
     try:
@@ -58,7 +81,6 @@ def main() -> None:
         parser.error("--top-k must be positive")
     if not 0 <= args.min_similarity <= 1:
         parser.error("--min-similarity must be between 0 and 1")
-
     if args.dataset == "synthetic":
         as_of = args.as_of or REFERENCE_DATE
         if args.profile_id is not None:
@@ -86,10 +108,50 @@ def main() -> None:
         checker = load_real_checker(grants)
         store = VectorStore()
 
+    additional_chunks = None
+    extracted_details = None
+    if args.deepseek_extract:
+        extractor = DeepSeekGrantExtractor(
+            args.deepseek_model, cache_path=args.deepseek_cache
+        )
+        additional_chunks = {}
+        extracted_details = {}
+        grants_processed = 0
+        for grant in grants.to_dict("records"):
+            source = grant_source_text(grant)
+            try:
+                details = extractor.extract(source)
+            except GrantDetailExtractionError as error:
+                # One unusable model answer should not abort the whole run; rank this grant
+                # on its workbook text alone, like a grant with no validated fields.
+                print(
+                    f"DeepSeek skipped source row {grant['source_row']} "
+                    f"({grant['program']}): {error}",
+                    file=sys.stderr,
+                )
+                continue
+            extracted_details[int(grant["source_row"])] = details
+            chunks = [
+                f"{field}: {details[field]}"
+                for field in DEEPSEEK_RANKING_FIELDS
+                if details[field] is not None
+            ]
+            if chunks:
+                additional_chunks[int(grant["source_row"])] = chunks
+            grants_processed += 1
+        print(
+            f"DeepSeek processed {grants_processed} grants; "
+            f"{extractor.cache_hits} cache hits, {extractor.model_calls} model calls. "
+            "Validated extracted details are included in recommendation evidence.",
+            file=sys.stderr,
+        )
+
     pipeline = Pipeline(
         grants=grants,
         checker=checker,
         store=store,
+        additional_chunks=additional_chunks,
+        extracted_details=extracted_details,
         generator=LocalGenerator() if args.explain else None,
     )
     recommendations = pipeline.recommend(

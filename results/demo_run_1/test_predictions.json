@@ -281,7 +281,11 @@
       "all-MiniLM-L6-v2 + logistic regression": "ineligible",
       "all-MiniLM-L6-v2 + PyTorch MLP": "unrelated",
       "all-MiniLM-L12-v2 + logistic regression": "ineligible",
+<<<<<<< HEAD
       "all-mpnet-base-v2 + logistic regression": "match"
+=======
+      "all-mpnet-base-v2 + logistic regression": "ineligible"
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
     }
   },
   {
@@ -1436,7 +1440,11 @@
       "all-MiniLM-L6-v2 + logistic regression": "match",
       "all-MiniLM-L6-v2 + PyTorch MLP": "unrelated",
       "all-MiniLM-L12-v2 + logistic regression": "ineligible",
+<<<<<<< HEAD
       "all-mpnet-base-v2 + logistic regression": "match"
+=======
+      "all-mpnet-base-v2 + logistic regression": "unrelated"
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
     }
   },
   {
@@ -1868,7 +1876,11 @@
     "predictions": {
       "Majority class": "unrelated",
       "TF-IDF + logistic regression": "ineligible",
+<<<<<<< HEAD
       "all-MiniLM-L6-v2 + logistic regression": "unrelated",
+=======
+      "all-MiniLM-L6-v2 + logistic regression": "ineligible",
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
       "all-MiniLM-L6-v2 + PyTorch MLP": "ineligible",
       "all-MiniLM-L12-v2 + logistic regression": "ineligible",
       "all-mpnet-base-v2 + logistic regression": "ineligible"
@@ -2081,7 +2093,11 @@
       "all-MiniLM-L6-v2 + logistic regression": "ineligible",
       "all-MiniLM-L6-v2 + PyTorch MLP": "unrelated",
       "all-MiniLM-L12-v2 + logistic regression": "ineligible",
+<<<<<<< HEAD
       "all-mpnet-base-v2 + logistic regression": "unrelated"
+=======
+      "all-mpnet-base-v2 + logistic regression": "ineligible"
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
     }
   },
   {
@@ -2123,7 +2139,11 @@
     "predictions": {
       "Majority class": "unrelated",
       "TF-IDF + logistic regression": "ineligible",
+<<<<<<< HEAD
       "all-MiniLM-L6-v2 + logistic regression": "match",
+=======
+      "all-MiniLM-L6-v2 + logistic regression": "ineligible",
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
       "all-MiniLM-L6-v2 + PyTorch MLP": "ineligible",
       "all-MiniLM-L12-v2 + logistic regression": "ineligible",
       "all-mpnet-base-v2 + logistic regression": "ineligible"
@@ -2561,7 +2581,11 @@
       "all-MiniLM-L6-v2 + logistic regression": "unrelated",
       "all-MiniLM-L6-v2 + PyTorch MLP": "unrelated",
       "all-MiniLM-L12-v2 + logistic regression": "unrelated",
+<<<<<<< HEAD
       "all-mpnet-base-v2 + logistic regression": "unrelated"
+=======
+      "all-mpnet-base-v2 + logistic regression": "ineligible"
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
     }
   },
   {
@@ -4421,7 +4445,11 @@
       "all-MiniLM-L6-v2 + logistic regression": "ineligible",
       "all-MiniLM-L6-v2 + PyTorch MLP": "ineligible",
       "all-MiniLM-L12-v2 + logistic regression": "unrelated",
+<<<<<<< HEAD
       "all-mpnet-base-v2 + logistic regression": "match"
+=======
+      "all-mpnet-base-v2 + logistic regression": "unrelated"
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
     }
   },
   {
@@ -5933,7 +5961,11 @@
     "predictions": {
       "Majority class": "unrelated",
       "TF-IDF + logistic regression": "unrelated",
+<<<<<<< HEAD
       "all-MiniLM-L6-v2 + logistic regression": "unrelated",
+=======
+      "all-MiniLM-L6-v2 + logistic regression": "ineligible",
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
       "all-MiniLM-L6-v2 + PyTorch MLP": "unrelated",
       "all-MiniLM-L12-v2 + logistic regression": "ineligible",
       "all-mpnet-base-v2 + logistic regression": "unrelated"
@@ -6010,7 +6042,11 @@
       "TF-IDF + logistic regression": "match",
       "all-MiniLM-L6-v2 + logistic regression": "unrelated",
       "all-MiniLM-L6-v2 + PyTorch MLP": "ineligible",
+<<<<<<< HEAD
       "all-MiniLM-L12-v2 + logistic regression": "match",
+=======
+      "all-MiniLM-L12-v2 + logistic regression": "unrelated",
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
       "all-mpnet-base-v2 + logistic regression": "unrelated"
     }
   },
@@ -6880,7 +6916,11 @@
       "TF-IDF + logistic regression": "unrelated",
       "all-MiniLM-L6-v2 + logistic regression": "match",
       "all-MiniLM-L6-v2 + PyTorch MLP": "unrelated",
+<<<<<<< HEAD
       "all-MiniLM-L12-v2 + logistic regression": "match",
+=======
+      "all-MiniLM-L12-v2 + logistic regression": "unrelated",
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
       "all-mpnet-base-v2 + logistic regression": "unrelated"
     }
   },
@@ -7931,7 +7971,11 @@
       "all-MiniLM-L6-v2 + logistic regression": "ineligible",
       "all-MiniLM-L6-v2 + PyTorch MLP": "unrelated",
       "all-MiniLM-L12-v2 + logistic regression": "ineligible",
+<<<<<<< HEAD
       "all-mpnet-base-v2 + logistic regression": "unrelated"
+=======
+      "all-mpnet-base-v2 + logistic regression": "ineligible"
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
     }
   },
   {
@@ -9743,7 +9787,11 @@
     "predictions": {
       "Majority class": "unrelated",
       "TF-IDF + logistic regression": "unrelated",
+<<<<<<< HEAD
       "all-MiniLM-L6-v2 + logistic regression": "unrelated",
+=======
+      "all-MiniLM-L6-v2 + logistic regression": "ineligible",
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
       "all-MiniLM-L6-v2 + PyTorch MLP": "unrelated",
       "all-MiniLM-L12-v2 + logistic regression": "unrelated",
       "all-mpnet-base-v2 + logistic regression": "ineligible"
@@ -11575,7 +11623,11 @@
       "TF-IDF + logistic regression": "unrelated",
       "all-MiniLM-L6-v2 + logistic regression": "unrelated",
       "all-MiniLM-L6-v2 + PyTorch MLP": "unrelated",
+<<<<<<< HEAD
       "all-MiniLM-L12-v2 + logistic regression": "unrelated",
+=======
+      "all-MiniLM-L12-v2 + logistic regression": "ineligible",
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
       "all-mpnet-base-v2 + logistic regression": "unrelated"
     }
   },
@@ -12431,7 +12483,11 @@
       "all-MiniLM-L6-v2 + logistic regression": "unrelated",
       "all-MiniLM-L6-v2 + PyTorch MLP": "unrelated",
       "all-MiniLM-L12-v2 + logistic regression": "ineligible",
+<<<<<<< HEAD
       "all-mpnet-base-v2 + logistic regression": "match"
+=======
+      "all-mpnet-base-v2 + logistic regression": "ineligible"
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
     }
   },
   {
@@ -13300,7 +13356,11 @@
       "TF-IDF + logistic regression": "unrelated",
       "all-MiniLM-L6-v2 + logistic regression": "unrelated",
       "all-MiniLM-L6-v2 + PyTorch MLP": "unrelated",
+<<<<<<< HEAD
       "all-MiniLM-L12-v2 + logistic regression": "ineligible",
+=======
+      "all-MiniLM-L12-v2 + logistic regression": "unrelated",
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
       "all-mpnet-base-v2 + logistic regression": "unrelated"
     }
   },
@@ -14035,7 +14095,11 @@
       "TF-IDF + logistic regression": "unrelated",
       "all-MiniLM-L6-v2 + logistic regression": "match",
       "all-MiniLM-L6-v2 + PyTorch MLP": "match",
+<<<<<<< HEAD
       "all-MiniLM-L12-v2 + logistic regression": "match",
+=======
+      "all-MiniLM-L12-v2 + logistic regression": "ineligible",
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
       "all-mpnet-base-v2 + logistic regression": "match"
     }
   },
@@ -14186,7 +14250,11 @@
       "all-MiniLM-L6-v2 + logistic regression": "unrelated",
       "all-MiniLM-L6-v2 + PyTorch MLP": "ineligible",
       "all-MiniLM-L12-v2 + logistic regression": "ineligible",
+<<<<<<< HEAD
       "all-mpnet-base-v2 + logistic regression": "ineligible"
+=======
+      "all-mpnet-base-v2 + logistic regression": "unrelated"
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
     }
   },
   {
@@ -15128,7 +15196,11 @@
     "predictions": {
       "Majority class": "unrelated",
       "TF-IDF + logistic regression": "unrelated",
+<<<<<<< HEAD
       "all-MiniLM-L6-v2 + logistic regression": "ineligible",
+=======
+      "all-MiniLM-L6-v2 + logistic regression": "unrelated",
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
       "all-MiniLM-L6-v2 + PyTorch MLP": "unrelated",
       "all-MiniLM-L12-v2 + logistic regression": "ineligible",
       "all-mpnet-base-v2 + logistic regression": "match"
@@ -15578,7 +15650,11 @@
     "predictions": {
       "Majority class": "unrelated",
       "TF-IDF + logistic regression": "unrelated",
+<<<<<<< HEAD
       "all-MiniLM-L6-v2 + logistic regression": "ineligible",
+=======
+      "all-MiniLM-L6-v2 + logistic regression": "unrelated",
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
       "all-MiniLM-L6-v2 + PyTorch MLP": "unrelated",
       "all-MiniLM-L12-v2 + logistic regression": "ineligible",
       "all-mpnet-base-v2 + logistic regression": "unrelated"
@@ -16046,7 +16122,11 @@
       "all-MiniLM-L6-v2 + logistic regression": "ineligible",
       "all-MiniLM-L6-v2 + PyTorch MLP": "ineligible",
       "all-MiniLM-L12-v2 + logistic regression": "unrelated",
+<<<<<<< HEAD
       "all-mpnet-base-v2 + logistic regression": "ineligible"
+=======
+      "all-mpnet-base-v2 + logistic regression": "unrelated"
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
     }
   },
   {
@@ -16721,7 +16801,11 @@
       "all-MiniLM-L6-v2 + logistic regression": "unrelated",
       "all-MiniLM-L6-v2 + PyTorch MLP": "unrelated",
       "all-MiniLM-L12-v2 + logistic regression": "unrelated",
+<<<<<<< HEAD
       "all-mpnet-base-v2 + logistic regression": "match"
+=======
+      "all-mpnet-base-v2 + logistic regression": "ineligible"
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
     }
   },
   {
@@ -17426,7 +17510,11 @@
       "all-MiniLM-L6-v2 + logistic regression": "ineligible",
       "all-MiniLM-L6-v2 + PyTorch MLP": "unrelated",
       "all-MiniLM-L12-v2 + logistic regression": "ineligible",
+<<<<<<< HEAD
       "all-mpnet-base-v2 + logistic regression": "ineligible"
+=======
+      "all-mpnet-base-v2 + logistic regression": "unrelated"
+>>>>>>> 8d446096bb1877e61057b95905ed4ba2180f8b8f
     }
   },
   {
