@@ -5,3 +5,4 @@ vector_store/
 vector_store_synthetic/
 vector_store_synthetic_eval/
 models/
+.cache/

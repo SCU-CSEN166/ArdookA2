@@ -173,8 +173,12 @@ make tracker DESCRIPTION="Ardook is an early-stage, woman-led U.S. startup build
 make recommend DESCRIPTION="Ardook is an early-stage, woman-led U.S. startup building AI, physical-AI and data products with a social-impact mission."
 python -m src.evaluate_safety
 ```
+- Optional DeepSeek grant-detail extraction (requires a CUDA GPU):
+  `make deepseek-extraction` (Wave setup required), or run
+  `python -m src.recommend --dataset synthetic --profile-id 1 --deepseek-extract`.
 - **Model(s) and data actually used:**
   - Models: [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) turns grants and organization descriptions into embeddings, which are stored in ChromaDB. [FLAN-T5-small](https://huggingface.co/google/flan-t5-small) writes the short explanation for each recommendation and does not decide eligibility.
+  - Optional DeepSeek-R1-Distill-Qwen-1.5B extraction copies grant details from the spreadsheet. The extractor validates them against their source fields and can add fit-related details to ranking text. It has not yet shown a visible matching improvement.
   - Data: the real Ardook grant tracker, a fake dataset of 150 grants and 200 organizations, and a messy copy of the fake data with blanks, typos and duplicates.
 - **Example 1:** Input: "Ardook is an early-stage, woman-led U.S. startup building AI, physical-AI and data products with a social-impact mission." → Output: NVIDIA Inception, Oasis Women in AI Pitch Competition, AI for Good Innovation Factory, Humanity AI, Google for Startups Accelerator (3 of 5 rated Strong/Excellent)
 - **Example 2:** Input: "Our nonprofit works on rapid rehousing and eviction prevention for families and is looking for early funding to grow." → Output: Marigold Foundry Fund, Ember Signal Grant, Atlas Impact Initiative, Orchard Bridge Initiative, Cedar Community Program (all marked "needs verification")
@@ -275,6 +279,7 @@ The script uses CPU, performs no model downloads, and refuses to overwrite an ex
 | ------ | --------------- | --------------------------------- | -------- | ----------- |
 | Jason Wu | I created the 160-pair human-labeling workflow and logistic regression/PyTorch training scripts. I then implemented and ran six classifier configurations on the existing synthetic data, holding out both organizations and grants. I recorded accuracy, macro-F1, per-class metrics, confusion matrices, and representative failures. | Worked for the synthetic experiment: the validation-selected MiniLM-L6 + PyTorch classifier achieved 85.7% test accuracy and 0.574 macro-F1, but only 24.1% match recall. Human reviews and real-world improvement remain unverified. | [Review workbook](outputs/ranking-review/ranking_review.xlsx), [model comparison script](src/compare_models.py), [full results](results/model_comparison_v1/report.json), [test predictions](results/model_comparison_v1/test_predictions.json) | Complete human-reviewed evaluation, investigate missed matches and entity-rule errors, and compare ranking performance before integration. |
 | Michael Tiburcio | I improved the vector store so now it only re-embeds grants that changed and also made ranking based on semantic search with keyword matching and also now ignoring duplicate listings. | Worked: the precision went from 47.0% to 53.9% on our fake data and from 60% to 80% on the real tracker. | PR #6 (feature/vector-store-embeddings) | Fine-tune the embedding model on Jason's human labels once they're done. |
+| Seerat Kakar | I added a DeepSeek feature that extracts grant details from the spreadsheet. It checks extracted details against the original text and can use them to help rank grants. | Partly: no visible improvement in matching results yet. | `src/deepseek_extractor.py`, `src/recommend.py` | Evaluate whether DeepSeek-extracted details improve matching, then add a LoRA adapter to score candidate fit. |
 
 ---
 
