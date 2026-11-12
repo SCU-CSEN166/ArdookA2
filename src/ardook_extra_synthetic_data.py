@@ -19,9 +19,10 @@ from pathlib import Path
 import pandas as pd
 
 from src.ingest import COLUMNS, clean_grants
+from src.paths import REPO_ROOT
 from src.pipeline import EligibilityChecker, EligibilityRule
 
-DB_PATH = Path("data/ardook_extra_synthetic_data.db")
+DB_PATH = REPO_ROOT / "data/ardook_extra_synthetic_data.db"
 REFERENCE_DATE = date(2026, 10, 1)  # fixed so the data does not drift with today's date
 
 # focus area -> (wording used by grants, wordings used by organizations)
