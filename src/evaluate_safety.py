@@ -11,7 +11,6 @@ Run `python -m src.evaluate_safety --dataset all --embedder keyword` for a fast 
 """
 
 import argparse
-import hashlib
 import json
 import re
 from collections import Counter
@@ -25,9 +24,9 @@ from src import ardook_messy_synthetic_data as messy
 from src.ingest import load_grants as load_real_grants
 from src.pipeline import OrganizationProfile, Pipeline
 from src.real_eligibility import load_checker as load_real_checker
+from src.stores import KeywordEmbedder, MemoryStore
 
 K = 5
-TOKEN = re.compile(r"[a-z0-9]+")
 NOT_RULES = {"deadline", "application round", "remaining requirements"}
 NO_SOURCE = {"", "tbd", "n/a", "none"}
 
@@ -44,32 +43,6 @@ REAL_PROFILES = [
      {"entity_type": "for-profit", "business_base_country": "Kenya"}),
     ("We help people in our community.", {}),
 ]
-
-
-class KeywordEmbedder:
-    """Deterministic token-overlap vectors, the baseline the semantic model must beat."""
-
-    def encode(self, texts: list[str]) -> np.ndarray:
-        vectors = np.zeros((len(texts), 4096))
-        for row, text in enumerate(texts):
-            for token in TOKEN.findall(text.casefold()):
-                index = int.from_bytes(hashlib.sha256(token.encode()).digest()[:4], "big") % 4096
-                vectors[row, index] += 1
-        return vectors
-
-
-class MemoryStore:
-    """Vectors held in memory only, so evaluation never writes an index to disk."""
-
-    def is_current(self, ids, documents, embedder):
-        return False
-
-    def replace(self, ids, documents, vectors, embedder):
-        self.ids = ids
-        self.vectors = vectors
-
-    def similarities(self, query):
-        return dict(zip(self.ids, (self.vectors @ query.T).ravel().tolist()))
 
 
 def _norm(value) -> str:
@@ -127,7 +100,7 @@ def _audit(recs, profile, grants_by_row, checker, labels=None, reasons=None, pro
 
 def _pipeline(grants, checker, embedder):
     if embedder == "keyword":
-        return Pipeline(grants, checker=checker, embedder=KeywordEmbedder(), store=MemoryStore()), 1e-12
+        return Pipeline(grants, checker=checker, embedder=KeywordEmbedder(), store=MemoryStore(), lexical_weight=0, dedupe_threshold=None), 1e-12
     return Pipeline(grants, checker=checker, store=MemoryStore()), 0.25
 
 

@@ -1,16 +1,28 @@
+from collections import OrderedDict
 from dataclasses import asdict, dataclass, field
 from datetime import date
 import json
+import os
+from pathlib import Path
+import threading
 from typing import Protocol
 
 import numpy as np
 import pandas as pd
 
 from src.ingest import load_grants
+from src.lexical import BM25
+from src.paths import DEFAULT_WORKBOOK
+from src.stores import MemoryStore
 from src.vector_store import VectorStore
 
 DEFAULT_MIN_SIMILARITY = 0.20
 DEFAULT_CHUNK_WEIGHT = 0.5
+# Share of the ordering score given to BM25 term matching; swept 0.1-0.7, flat peak at 0.2-0.3.
+DEFAULT_LEXICAL_WEIGHT = 0.3
+# Grant documents this similar are the same listing (typo, casing or suffix variants). On the messy
+# data 0.93-0.97 all catch 13 of 15 planted duplicates; clean and real data have no pair above 0.87.
+DEFAULT_DEDUPE_THRESHOLD = 0.95
 
 
 class Embedder(Protocol):
@@ -22,18 +34,62 @@ class Generator(Protocol):
 
 
 class SemanticEncoder:
-    """Load the embedding model once; keep the small index in memory."""
+    """Load the embedding model once; keep the small index in memory.
 
-    def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
+    The model is a setting (`model_name`, or ARDOOK_EMBEDDING_MODEL), so swapping it needs no code
+    change: the store records which model made each vector and rebuilds on a mismatch. The device
+    defaults to CPU for reproducible scores (ARDOOK_DEVICE=mps/cuda opts in). Repeated texts, such
+    as the same applicant description queried again, are served from a small thread-safe cache.
+    """
+
+    DEFAULT_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+
+    def __init__(
+        self,
+        model_name: str | None = None,
+        *,
+        device: str | None = None,
+        batch_size: int = 64,
+        cache_size: int = 256,
+    ):
         from sentence_transformers import SentenceTransformer
 
-        self.model_name = model_name
-        self.model = SentenceTransformer(model_name, device="cpu")
+        self.model_name = model_name or os.environ.get("ARDOOK_EMBEDDING_MODEL") or self.DEFAULT_MODEL
+        self.device = device or os.environ.get("ARDOOK_DEVICE") or "cpu"
+        self.batch_size = batch_size
+        self.model = SentenceTransformer(self.model_name, device=self.device)
+        self._cache: OrderedDict[str, np.ndarray] = OrderedDict()
+        self._cache_size = cache_size
+        self._lock = threading.Lock()  # guards the cache
+        self._model_lock = threading.Lock()  # tokenizers can fail when shared across threads
+
+    def _lookup(self, texts: list[str]) -> dict[str, np.ndarray]:
+        with self._lock:
+            found = {}
+            for text_ in texts:
+                if text_ in self._cache:
+                    self._cache.move_to_end(text_)
+                    found[text_] = self._cache[text_]
+            return found
 
     def encode(self, texts: list[str]) -> np.ndarray:
-        return self.model.encode(
-            texts, normalize_embeddings=True, convert_to_numpy=True
-        )
+        vectors = self._lookup(texts)
+        missing = list(dict.fromkeys(t for t in texts if t not in vectors))
+        if missing:
+            with self._model_lock:
+                encoded = self.model.encode(
+                    missing,
+                    batch_size=self.batch_size,
+                    normalize_embeddings=True,
+                    convert_to_numpy=True,
+                )
+            with self._lock:
+                for text_, vector in zip(missing, encoded):
+                    vectors[text_] = vector
+                    self._cache[text_] = vector
+                while len(self._cache) > self._cache_size:
+                    self._cache.popitem(last=False)
+        return np.stack([vectors[t] for t in texts]) if texts else np.empty((0, 0))
 
 
 class LocalGenerator:
@@ -198,15 +254,23 @@ class Pipeline:
         store: VectorStore | None = None,
         *,
         chunk_weight: float = DEFAULT_CHUNK_WEIGHT,
-        workbook: str = "Ardook_data.xlsx",
+        lexical_weight: float = DEFAULT_LEXICAL_WEIGHT,
+        read_only: bool = False,
+        dedupe_threshold: float | None = DEFAULT_DEDUPE_THRESHOLD,
+        workbook: str | Path = DEFAULT_WORKBOOK,
     ):
         if not 0 <= chunk_weight <= 1:
             raise ValueError("chunk_weight must be between 0 and 1")
+        if not 0 <= lexical_weight <= 1:
+            raise ValueError("lexical_weight must be between 0 and 1")
+        if dedupe_threshold is not None and not 0 < dedupe_threshold <= 1:
+            raise ValueError("dedupe_threshold must be in (0, 1] or None")
         if grants is None:
             grants = load_grants(workbook)
         self.grants = grants.to_dict("records")
         self.embedder = embedder if embedder is not None else SemanticEncoder()
         self.chunk_weight = chunk_weight
+        self.lexical_weight = lexical_weight
         self.checker = checker or EligibilityChecker()
         self.generator = generator
         unknown = self.checker.rules.keys() - {
@@ -215,26 +279,28 @@ class Pipeline:
         if unknown:
             raise ValueError(f"Rules reference unknown programs: {sorted(unknown)}")
         self.store = store or VectorStore()
-        self.chunk_store = (
-            VectorStore(path=self.store.path, name=f"{self.store.name}_chunks")
-            if isinstance(self.store, VectorStore)
-            else None
-        )
         documents = [
             "\n".join(f"{key}: {text(grant[key])}" for key in self.RETRIEVAL_FIELDS)
             for grant in self.grants
         ]
         ids = [str(grant["source_row"]) for grant in self.grants]
-        # Vectors are tied to the model that made them; custom embedders can expose model_name.
-        embedder_name = getattr(self.embedder, "model_name", type(self.embedder).__name__)
-        # Re-embed only when the grant text or the embedding model changed since the last run.
-        if not self.store.is_current(ids, documents, embedder_name):
-            embeddings = (
-                self._normalize(self.embedder.encode(documents)) if documents else None
-            )
-            if embeddings is not None and len(embeddings) != len(documents):
-                raise ValueError("Expected one embedding per grant")
-            self.store.replace(ids, documents, embeddings, embedder_name)
+        if len(set(ids)) != len(ids):
+            raise ValueError("Each grant needs a unique source_row")
+        self.bm25 = BM25(documents) if self.lexical_weight else None
+        # Vectors are tied to the model that made them, so persistent indexes need its name.
+        embedder_name = getattr(self.embedder, "model_name", None)
+        if not embedder_name:
+            if not isinstance(self.store, MemoryStore):
+                raise ValueError(
+                    "A persistent index needs embedder.model_name so vectors from a different "
+                    "model are never mixed; add a model_name attribute to the embedder."
+                )
+            embedder_name = type(self.embedder).__name__
+        # Only new or changed grant text (or a new embedding model) is re-embedded.
+        self.store.sync(ids, documents, self._embed, embedder_name, read_only=read_only)
+        self.doc_embeddings = self.store.embeddings(ids)
+        self.duplicates = self._duplicate_groups(dedupe_threshold)
+        self._index_of = {int(grant["source_row"]): i for i, grant in enumerate(self.grants)}
         self.chunk_owners = np.array([], dtype=int)
         self.chunk_embeddings = np.empty((0, 0))
         if self.chunk_weight:
@@ -256,19 +322,30 @@ class Pipeline:
                         chunk_ids.append(f"{grant['source_row']}:{chunk_index}")
                         owners.append(index)
                         chunk_index += 1
-            if chunks and self.chunk_store:
-                if not self.chunk_store.is_current(chunk_ids, chunks, embedder_name):
-                    embeddings = self._normalize(self.embedder.encode(chunks))
-                    self.chunk_store.replace(
-                        chunk_ids, chunks, embeddings, embedder_name
-                    )
-                self.chunk_embeddings = self.chunk_store.embeddings(chunk_ids)
-            elif chunks:
-                self.chunk_embeddings = self._normalize(self.embedder.encode(chunks))
             if chunks:
-                if len(self.chunk_embeddings) != len(chunks):
-                    raise ValueError("Expected one embedding per grant text chunk")
+                self.chunk_store = self.store.child("chunks")
+                self.chunk_store.sync(
+                    chunk_ids, chunks, self._embed, embedder_name, read_only=read_only
+                )
+                self.chunk_embeddings = self.chunk_store.embeddings(chunk_ids)
                 self.chunk_owners = np.asarray(owners)
+
+    def _duplicate_groups(self, threshold: float | None) -> list[set[int]]:
+        """For each grant, the other grants whose documents are near-identical listings."""
+        groups: list[set[int]] = [set() for _ in self.grants]
+        if threshold is None or len(self.grants) < 2:
+            return groups
+        similarity = self.doc_embeddings @ self.doc_embeddings.T
+        for i, j in zip(*np.where(np.triu(similarity, k=1) >= threshold)):
+            groups[i].add(int(j))
+            groups[j].add(int(i))
+        return groups
+
+    def _embed(self, texts: list[str]) -> np.ndarray:
+        vectors = self._normalize(self.embedder.encode(texts))
+        if len(vectors) != len(texts):
+            raise ValueError("Expected one embedding per text")
+        return vectors
 
     @staticmethod
     def _normalize(vectors: np.ndarray) -> np.ndarray:
@@ -277,6 +354,32 @@ class Pipeline:
             raise ValueError("Embeddings must be a finite two-dimensional matrix")
         norms = np.linalg.norm(vectors, axis=1, keepdims=True)
         return vectors / np.where(norms == 0, 1, norms)
+
+    def _dense_scores(self, query: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        """Cosine to each grant document, and that blended with the best-matching chunk."""
+        document_scores = self.doc_embeddings @ query
+        if not self.chunk_weight:
+            return document_scores, document_scores
+        chunk_scores = np.full(len(self.grants), -np.inf)
+        np.maximum.at(chunk_scores, self.chunk_owners, self.chunk_embeddings @ query)
+        chunk_scores = np.where(np.isfinite(chunk_scores), chunk_scores, document_scores)
+        blended = (
+            (1 - self.chunk_weight) * document_scores + self.chunk_weight * chunk_scores
+        )
+        return document_scores, blended
+
+    def _order_scores(self, description: str, relevance: np.ndarray) -> np.ndarray:
+        """Order by dense relevance blended with BM25 term matching.
+
+        Dense relevance alone gates results (min_similarity), so the threshold keeps its meaning
+        and a purely lexical match can never surface an unrelated grant.
+        """
+        if not self.bm25:
+            return relevance
+        return (
+            (1 - self.lexical_weight) * relevance
+            + self.lexical_weight * self.bm25.normalized(description)
+        )
 
     def recommend(
         self,
@@ -295,21 +398,8 @@ class Pipeline:
         query = self._normalize(self.embedder.encode([profile.description]))
         if query.shape[0] != 1:
             raise ValueError("Expected one query embedding")
-        similarities = self.store.similarities(query)
-        document_scores = np.array(
-            [similarities[str(grant["source_row"])] for grant in self.grants]
-        )
-        ranking_scores = document_scores
-        if self.chunk_weight:
-            chunk_scores = np.full(len(self.grants), -np.inf)
-            np.maximum.at(
-                chunk_scores, self.chunk_owners, (self.chunk_embeddings @ query[0])
-            )
-            chunk_scores = np.where(np.isfinite(chunk_scores), chunk_scores, document_scores)
-            ranking_scores = (
-                (1 - self.chunk_weight) * document_scores
-                + self.chunk_weight * chunk_scores
-            )
+        document_scores, relevance = self._dense_scores(query[0])
+        ranking_scores = self._order_scores(profile.description, relevance)
         recommendations = []
         for index, grant in enumerate(self.grants):
             similarity = document_scores[index]
@@ -317,7 +407,7 @@ class Pipeline:
             checks = self.checker.check(grant, profile, as_of or date.today())
             if (
                 any(check.status == "fail" for check in checks)
-                or ranking_score < min_similarity
+                or relevance[index] < min_similarity
             ):
                 continue
             recommendations.append(
@@ -335,7 +425,15 @@ class Pipeline:
         recommendations.sort(
             key=lambda result: (-result.score, result.source_row)
         )
-        selected = recommendations[:top_k]
+        selected, shown = [], set()
+        for result in recommendations:
+            index = self._index_of[result.source_row]
+            if self.duplicates[index] & shown:
+                continue  # a better-ranked copy of the same listing is already shown
+            shown.add(index)
+            selected.append(result)
+            if len(selected) == top_k:
+                break
         if self.generator:
             for result in selected:
                 # One retrieved grant per prompt keeps evidence attributable.

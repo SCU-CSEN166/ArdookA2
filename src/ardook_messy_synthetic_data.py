@@ -39,8 +39,9 @@ from src.ardook_extra_synthetic_data import (
     load_profiles as _load_profiles,
 )
 from src.ingest import COLUMNS
+from src.paths import REPO_ROOT
 
-DB_PATH = Path("data/ardook_messy_synthetic_data.db")
+DB_PATH = REPO_ROOT / "data/ardook_messy_synthetic_data.db"
 
 VAGUE_CLAUSES = [
     "see website for full criteria",
