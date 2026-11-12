@@ -92,7 +92,6 @@ python -m src.evaluate_safety
 ```
 - **Model(s) and data actually used:**
   - Models: [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) turns grants and organization descriptions into embeddings, which are stored in ChromaDB. [FLAN-T5-small](https://huggingface.co/google/flan-t5-small) writes the short explanation for each recommendation and does not decide eligibility.
-  - Optional DeepSeek-R1-Distill-Qwen-1.5B extraction copies grant details from the spreadsheet. The extractor validates them against their source fields and can add fit-related details to ranking text. It has not yet shown a visible matching improvement.
   - Data: the real Ardook grant tracker, a fake dataset of 150 grants and 200 organizations, and a messy copy of the fake data with blanks, typos and duplicates.
 - **Example 1:** Input: "Ardook is an early-stage, woman-led U.S. startup building AI, physical-AI and data products with a social-impact mission." → Output: NVIDIA Inception, Oasis Women in AI Pitch Competition, AI for Good Innovation Factory, Humanity AI, Google for Startups Accelerator (3 of 5 rated Strong/Excellent)
 - **Example 2:** Input: "Our nonprofit works on rapid rehousing and eviction prevention for families and is looking for early funding to grow." → Output: Marigold Foundry Fund, Ember Signal Grant, Atlas Impact Initiative, Orchard Bridge Initiative, Cedar Community Program (all marked "needs verification")
