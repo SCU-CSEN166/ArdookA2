@@ -206,13 +206,13 @@ training inputs. Source corrections require a new dataset version and review.
 
 - **What improved?** [Evidence]
 - **What did not improve?** [Evidence]
-- **Next experiment:** [Specific change and how you will measure it]
+- **Next experiment (Jason):** Complete and validate human relevance and eligibility labels for the 160 prepared organization–grant pairs, then train the logistic regression baseline and PyTorch classifier using the fixed organization-level splits. Compare classification performance using held-out macro-F1 and per-class precision/recall. Before integrating either classifier, compare its ranking with the existing recommendation system using Precision@5 on the same reviewed candidate sets, keeping eligibility checks separate. Use validation data for model selection and reserve test data for the final comparison. The labeling workflow and training scripts are implemented; human labeling, classifier evaluation, and evidence of improved recommendations are still pending.
 
 ### Individual contributions during that week
 
 | Member | Work completed  | Result (worked / partly / failed) | Evidence | Next step   |
 | ------ | --------------- | --------------------------------- | -------- | ----------- |
-| [Name] | [Specific work] | [Status] | [Link] | [Next step] |
+| Jason Wu | I created a human-labeling workflow with 160 organization–grant pairs using eight fictional applicant profiles and real tracker records. I added separate relevance and eligibility labels, review validation, and organization-level training/validation/test splits. I also implemented a logistic regression baseline and a PyTorch classifier training script with validation-based checkpoint selection and held-out evaluation. | Partly: the review dataset and training workflows are implemented, but the examples still need human labels. No improvement in recommendation quality has been established yet. | [Review workbook](outputs/ranking-review/ranking_review.xlsx), [dataset preparation](src/prepare_ranking_review.py), [review validation and baseline](src/ranking_classifier.py), [PyTorch training](src/train_pytorch.py) | Complete and validate human reviews, train the classifiers, and compare held-out relevance results before integrating a model into recommendations. |
 
 ---
 
