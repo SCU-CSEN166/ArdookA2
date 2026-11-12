@@ -1,12 +1,8 @@
 """Compare grant ranking with tracker ratings or Michael's synthetic labels."""
 
 import argparse
-import hashlib
 import json
-import re
 from datetime import date
-
-import numpy as np
 
 from src.ardook_extra_synthetic_data import (
     DB_PATH,
@@ -20,36 +16,9 @@ from src.ingest import load_grants
 from src.pipeline import DEFAULT_MIN_SIMILARITY, OrganizationProfile, Pipeline
 from src.vector_store import VectorStore
 from src.real_eligibility import load_checker as load_real_checker
+from src.stores import KeywordEmbedder, MemoryStore
 
 K = 5
-TOKEN = re.compile(r"[a-z0-9]+")
-
-
-class KeywordEmbedder:
-    """Create deterministic token-overlap vectors for the baseline ranker."""
-
-    def encode(self, texts: list[str]) -> np.ndarray:
-        vectors = np.zeros((len(texts), 4096))
-        for row, text in enumerate(texts):
-            for token in TOKEN.findall(text.casefold()):
-                index = int.from_bytes(hashlib.sha256(token.encode()).digest()[:4], "big") % 4096
-                vectors[row, index] += 1
-        return vectors
-
-
-class MemoryStore:
-    """Use vectors in memory for evaluation; only the semantic index persists."""
-
-    def is_current(self, ids, documents, embedder):
-        return False
-
-    def replace(self, ids, documents, vectors, embedder):
-        self.ids = ids
-        self.vectors = vectors
-
-    def similarities(self, query):
-        scores = (self.vectors @ query.T).ravel()
-        return dict(zip(self.ids, scores.tolist()))
 
 
 def _pipelines(grants, checker=None, store=None):
@@ -61,6 +30,8 @@ def _pipelines(grants, checker=None, store=None):
             embedder=KeywordEmbedder(),
             store=MemoryStore(),
             chunk_weight=0,
+            lexical_weight=0,
+            dedupe_threshold=None,
         ),
     }
 
