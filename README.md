@@ -162,26 +162,41 @@ training inputs. Source corrections require a new dataset version and review.
 
 ### Implementation status
 
-- **What runs end-to-end now?** The system reads grant records and an organization profile, checks deadlines and the eligibility rules available for selected programs, ranks grants by semantic similarity, and returns recommendations with scores, source links, evidence, and unknown checks. An optional local model can generate advisory fit notes; it does not determine eligibility.
-- **How to run it:** Install `requirements.txt`, then use `make recommend-synthetic` or `make recommend DESCRIPTION="..." ATTRIBUTES='{"entity_type":"nonprofit"}'`. Add `--deepseek-extract` to the Python command to extract grant details.
-- **Models:** The default ranker uses MiniLM on CPU. DeepSeek extraction is optional; it only accepts exact quotes from the grant text and caches the results.
-- **Example 1:** Input: `make recommend-synthetic` (generated profile 1: a nonprofit in India seeking early funding for rapid rehousing and eviction prevention). → Output: the top result is the synthetic Marigold Foundry Fund, scored 54.19, with eligibility marked `needs_verification`.
-- **Example 2:** Input: `make synthetic` (200 generated profiles evaluated against 150 generated grants). → Output: semantic ranking averages 47.0% Precision@5 and 37.7% Recall@5; the keyword baseline averages 36.9% Precision@5 and 29.1% Recall@5. These are synthetic integration results, not real-world accuracy evidence.
+- **What runs end-to-end now?** The system takes an organization's description and attributes, removes grants that fail a known eligibility rule, ranks the rest with semantic search and returns the top 5 grants. Each result has a score, its eligibility checks, quotes from the grant row and a source link. Eligibility is always shown as "needs verification", because the system never claims an organization definitely qualifies. Grant embeddings are saved in a Chroma vector store, so they are not rebuilt on every run.
+- **How to run it:**
+```
+cd ArdookA2
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+make synthetic
+make tracker DESCRIPTION="Ardook is an early-stage, woman-led U.S. startup building AI, physical-AI and data products with a social-impact mission."
+make recommend DESCRIPTION="Ardook is an early-stage, woman-led U.S. startup building AI, physical-AI and data products with a social-impact mission."
+python -m src.evaluate_safety
+```
+- Optional DeepSeek grant-detail extraction (requires a CUDA GPU):
+  `make deepseek-extraction` (Wave setup required), or run
+  `python -m src.recommend --dataset synthetic --profile-id 1 --deepseek-extract`.
+- **Model(s) and data actually used:**
+  - Models: [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) turns grants and organization descriptions into embeddings, which are stored in ChromaDB. [FLAN-T5-small](https://huggingface.co/google/flan-t5-small) writes the short explanation for each recommendation and does not decide eligibility.
+  - Optional DeepSeek-R1-Distill-Qwen-1.5B extraction copies grant details from the spreadsheet. The extractor validates them against their source fields and can add fit-related details to ranking text. It has not yet shown a visible matching improvement.
+  - Data: the real Ardook grant tracker, a fake dataset of 150 grants and 200 organizations, and a messy copy of the fake data with blanks, typos and duplicates.
+- **Example 1:** Input: "Ardook is an early-stage, woman-led U.S. startup building AI, physical-AI and data products with a social-impact mission." → Output: NVIDIA Inception, Oasis Women in AI Pitch Competition, AI for Good Innovation Factory, Humanity AI, Google for Startups Accelerator (3 of 5 rated Strong/Excellent)
+- **Example 2:** Input: "Our nonprofit works on rapid rehousing and eviction prevention for families and is looking for early funding to grow." → Output: Marigold Foundry Fund, Ember Signal Grant, Atlas Impact Initiative, Orchard Bridge Initiative, Cedar Community Program (all marked "needs verification")
 
 ### Attempts and outcomes
 
 | Attempt / change | Worked? (Yes / Partly / No) | Evidence (output, metric, link) | What we learned / next step |
 | ---------------- | --------------------------- | ------------------------------- | --------------------------- |
-| DeepSeek-R1-Distill-Qwen-1.5B extracts grant fields, added as ranking text | No | Wave RTX PRO 6000: tracker P@5 60% → 60%; synthetic 47.0% → 45.5% (22 profiles worse, 8 better). [notebook](notebooks/deepseek_ranking_evaluation.ipynb) | Per-field validation raised usable extractions from 8/37 to 37/37, but the values repeat workbook text already embedded, so they add noise. Kept opt-in. |
-| Larger embedding models (bge-large, e5-large, Qwen3-Embedding 0.6B/4B) | Partly | Qwen3-Embedding-4B: synthetic test P@5 60.2% vs 48.4% (MiniLM). [notebook](notebooks/ranking_techniques_evaluation.ipynb) | Best zero-shot first stage; no gain on the tracker. |
-| Cross-encoder reranker (bge-reranker-v2-m3) | Partly | Synthetic test 57.0%; tracker 40% | Better than MiniLM on synthetic, worse on the tracker. |
-| Zero-shot LLM fit judge, Qwen2.5-7B and 32B | Partly | Synthetic test 51.8% (7B), 52.8% (32B) | Model size did not help without task-specific training. |
+| Semantic search vs keyword matching on fake data | Yes | Precision@5: 47.0% vs 36.9% | Semantic search did better, but it's still under our 60% goal |
+| Semantic search on the real tracker | Partly | 3 of 5 good picks (60%), while keyword matching got 4 of 5 (80%) | Keywords caught words like "AI" and "women" that semantic search missed. Next, try using both together |
+| Eligibility rules from the workbook | Yes | 0 ineligible grants shown | The rules keep wrong grants out, so ranking can just focus on fit |
+| Testing on the messy data | Partly | All 20 safety checks passed, but 65 organizations got the same grant twice in their top 5 | Duplicate listings take up spots. Next, remove duplicates |
 
 ### Individual contributions during that week
 
 | Member           | What I personally implemented/tested                                                                                                                                                                                                                                    | Result (worked / partly / failed) | Evidence (commit, PR, experiment)        | Blocker / next step                                                                                     |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Seerat Kakar     | I updated the ranking to compare an organization’s profile with the whole grant and its individual requirements. It now reuses saved embeddings and lets us set a minimum similarity score. I also added commands to run recommendations and compare them with the keyword baseline. | Worked | `bd643cae2a584f40487374cfdb4179c8013260ac` | Evaluate whether source-grounded details extracted by DeepSeek improve recommendation rankings over the current model. |
+| Seerat Kakar     | I updated the ranking to compare an organization’s profile with the whole grant and its individual requirements. It now reuses saved embeddings and lets us set a minimum similarity score. I also added commands to run recommendations and compare them with the keyword baseline. | Worked | `bd643cae2a584f40487374cfdb4179c8013260ac` | Improve ranking performance by refining how grant relevance scores are calculated. |
 | Jason Wu | I updated the real data evaluator to use an explicit applicant profile and integrated workbook based eligibility rules for 6 programs into evaluations and recommendations. I also changed how conditional fit-labels were handled and CLI commands worked as intended. | Finished                          | 8ea4a922d27308a331ad788780288004b504f6cc | Continue to iterate on the pipeline and make sure that it's as accurate as possible for recommendations |
 | Michael Tiburcio  |  I updated our data and focused on making more inconsistent data to test whether or not our current pipelines and evaluations can flag when it is unsure whether the information is correct or not. I am also working on creating a reasoning feature, so it tells us why it is unsure about a recommendation (not enough information or too much guessing | Finished |  aad000250db026deb2ad6c7354e2027ece0916f2 | Continue to iterate on the reasoning part and get to a place where our model can be more consistent regardless of whether our data is clean or not |
 ---
@@ -192,31 +207,78 @@ training inputs. Source corrections require a new dataset version and review.
 
 ### Evaluation setup
 
-- **Development data:** Synthetic: 150 grants × 200 profiles; messy synthetic: 135 grants × 200 profiles; real: the 37-grant Ardook tracker with one applicant profile, evaluated as of 2026-10-28.
-- **Metrics and rationale:** Precision@5 and Recall@5 against `match` labels (synthetic) or Strong/Excellent tracker ratings, because a grants team reads the top five. We also report the ceiling: the best Precision@5 any ranking can reach when some profiles have fewer than five open relevant grants (79.4% on synthetic test, 34.7% messy).
-- **Comparison:** Ranking experiments were compared with the default MiniLM pipeline (0.20 threshold).
+- **Development data:** We tested on three sets. The fake dataset has 150 grants and 200 organizations, labeled by the same rules our eligibility checker uses. The messy dataset is a copy of it with blanks, typos, vague descriptions and duplicate listings. The third set is the Ardook grant data we were given, which already rates each grant's fit, and we count Strong or Excellent as a good pick. We also prepared 160 organization–grant pairs for human review; labeling is still pending.
+- **Metrics and rationale:** We use Precision@5 (how many of the 5 grants we show are good matches) and Recall@5 (how many of all the good grants made it into our top 5). A user only sees 5 recommendations, so those 5 are what matter. We also run 20 safety checks, like never showing a grant the organization can't apply for and never showing the same grant twice.
+- **Comparison:** The baseline is our Week 6 system, which used semantic search only. We added one change at a time and measured each on the same data.
 
-| System / version | Metric 1 | Metric 2 | Notes   |
-| ---------------- | -------: | -------: | ------- |
-| Baseline: MiniLM (default) | 48.4% synthetic test | 11.1% messy | Tracker 60% (3/5) |
+| System / version | Precision@5 | Recall@5 | Notes |
+| ---------------- | ----------: | -------: | ----- |
+| Keyword matching only | 36.9% | 29.1% | Starting point from Week 5 |
+| Week 6 baseline (semantic search) | 47.0% | 37.7% | Better than keywords, but under our 60% goal |
+| + mix keyword matching into the ranking | 53.9% | 41.0% | Biggest gain of the week |
+| + remove duplicate listings | 53.9% | 41.0% | Same score on clean data, but on messy data duplicates in the top 5 went from 65 organizations to 0 |
+| Tried 5 other embedding models and a reranker | about the same | | No real gain, so we kept all-MiniLM-L6-v2 |
+| Week 6 baseline, given Ardook data | 60.0% | 37.5% | 3 of 5 good picks |
+| Current, given Ardook data | 80.0% | 50.0% | 4 of 5 good picks |
 
 ### Successes, failures, and interpretation
 
 | Example / category | Expected behavior | Actual behavior | Success or failure? | Likely reason |
 | ------------------ | ----------------- | --------------- | ------------------- | ------------- |
-| Synthetic profile, wording not seen in training | Relevant grants in top five | 78.1% P@5, equal to the ceiling | Success | Judge learned the focus/eligibility rules behind the labels |
-| Messy grants (typos, blanks, duplicates) | Robust ranking | 23.8% P@5 of a 34.7% ceiling | Partial | Noisy text and `needs_review` pairs |
+| Ardook: "early-stage, woman-led U.S. startup building AI, physical-AI and data products with a social-impact mission" | Mostly Strong/Excellent grants in the top 5 | Went from 3 to 4 good picks. Two Moderate grants dropped out and two Excellent ones came in | Success | Keyword matching catches exact words like "AI" and "woman-led" that semantic search missed |
+| "free clinics and care navigation for uninsured patients" (messy data) | Each grant shows up once | Before, "Quill Signal Grant" and "quill signal grant" took 2 of the 5 spots. Now it shows once | Success | We now group listings that are almost the same and only keep one |
+| "Our mission is to make things better." (messy data) | Say there isn't enough information, or return weak matches | Still returns 5 grants, and only 1 is a good match | Failure | There's nothing in the description to match on, and the system doesn't flag vague input yet |
+| "tutoring and digital skills training for underserved students" (messy data) | Education grants in the top 5 | 0 of 5 are good matches | Failure | The messy grant text is blank or full of typos, so there isn't enough clean text to match the organization to the right grants |
 
-- **What improved?** Larger embedding models improved synthetic ranking, but did not improve results on the real tracker.
-- **What did not improve?** The real tracker: no new method beats the default MiniLM ranker (one applicant, so each grant is 20 points). DeepSeek detail extraction also did not improve ranking.
-- **Next experiment (Jason):** Complete and validate human relevance and eligibility labels for the 160 prepared organization–grant pairs, then train the logistic regression baseline and PyTorch classifier using the fixed organization-level splits. Compare classification performance using held-out macro-F1 and per-class precision/recall. Before integrating either classifier, compare its ranking with the existing recommendation system using Precision@5 on the same reviewed candidate sets, keeping eligibility checks separate. Use validation data for model selection and reserve test data for the final comparison. The labeling workflow and training scripts are implemented; human labeling, classifier evaluation, and evidence of improved recommendations are still pending.
-- **Next experiment (team):** Collect founder-reviewed fit labels for additional real applicant profiles. Current real-tracker comparisons use very few profiles, and provisional laundry labels are not ground truth.
+- **What improved?** Precision@5 went from 47.0% to 53.9% on the fake data and from 60% to 80% on the given Ardook data. Duplicate listings in the top 5 dropped from 65 organizations to 0, and all 20 safety checks still pass.
+- **What did not improve?** The messy data is still only about 15% Precision@5. Vague descriptions like "make things better" still get 5 confident-looking results. Switching embedding models didn't help either.
+### Synthetic classifier comparison (Jason)
+
+- **Development data:** The existing [clean synthetic database](data/ardook_extra_synthetic_data.db) contains 200 fictional organizations, 150 fictional grants, and 30,000 labeled pairs. Labels are generated by [the data generator](src/ardook_extra_synthetic_data.py): `unrelated` means no shared focus; `ineligible` means shared focus with a known rule violation; `match` means shared focus without a known rule violation. Missing applicant facts are tolerated and deadlines are ignored by these labels, so `match` does not establish eligibility. This experiment does not use the still-unlabeled human review workbook.
+- **Split:** Seed 42; organization inputs and grant inputs are each split approximately 60/20/20, grouping exact duplicate text together. Only pairs whose organization and grant belong to the same split are retained: 10,710 training pairs (119 organizations / 90 grants), 1,230 validation pairs (41 / 30), and 1,200 test pairs (40 / 30). The other 16,860 cross-split pairs are excluded. No organization/grant IDs or exact input texts cross splits, but generated phrasing and templates can recur. Test class counts are 1,003 unrelated, 143 ineligible, and 54 match.
+- **Metrics and rationale:** Accuracy, macro-precision, macro-recall, macro-F1, per-class precision/recall/F1, and confusion matrices. Macro-F1 is the model-selection metric because most pairs are unrelated. Match recall measures whether useful candidates are missed. These are classification metrics, not recommendation Precision@5.
+- **Comparison:** A majority baseline, TF-IDF pair features with logistic regression, three frozen sentence encoders with logistic regression, and MiniLM-L6 pair features with a PyTorch classifier. Every model receives the same organization descriptions/facts and grant program/type/requirements/amount text. Generated focus labels, existing Fit ratings, rule-check outputs and reviewer notes are excluded from inputs. TF-IDF vocabulary and embedding-feature scaling are fitted on training data only. Logistic regression uses balanced class weights and C=1. The PyTorch model uses a 64-unit hidden layer, dropout 0.2, balanced cross-entropy, and Adam; its epoch is selected from 20 epochs by validation macro-F1. No sentence encoder is fine-tuned.
+
+Results from the November 12, 2026 run on the same 1,200 test pairs:
+
+| Classifier experiment | Validation macro-F1 | Test accuracy | Test macro-precision | Test macro-recall | Test macro-F1 | Test match recall |
+| --------------------- | ------------------: | ------------: | -------------------: | ----------------: | ------------: | ----------------: |
+| Majority: always unrelated | 0.306 | 83.6% | 0.279 | 0.333 | 0.304 | 0.0% |
+| TF-IDF + logistic regression | 0.488 | 75.4% | 0.517 | 0.649 | 0.549 | 44.4% |
+| MiniLM-L6 + logistic regression | 0.430 | 75.3% | 0.481 | 0.553 | 0.503 | 38.9% |
+| MiniLM-L6 + PyTorch classifier | **0.531** | **85.7%** | **0.618** | 0.548 | **0.574** | 24.1% |
+| MiniLM-L12 + logistic regression | 0.416 | 71.5% | 0.449 | 0.491 | 0.454 | 20.4% |
+| MPNet + logistic regression | 0.513 | 82.1% | 0.538 | 0.581 | 0.552 | **48.1%** |
+
+MiniLM-L6 + PyTorch was selected using validation macro-F1 (epoch 19), before using test metrics for comparison. Full metrics, settings, dataset/script hashes, package versions, split IDs, and epoch history are in [report.json](results/model_comparison_v1/report.json). Every test prediction and its input text is in [test_predictions.json](results/model_comparison_v1/test_predictions.json). This is one synthetic split, with shared records across pairs; the figures do not establish real-world accuracy or statistical significance.
+
+Reproduce with the locally cached `sentence-transformers/all-MiniLM-L6-v2`, `all-MiniLM-L12-v2`, and `all-mpnet-base-v2` models:
+
+```bash
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4 \
+  .venv/bin/python -m src.compare_models --output results/model_comparison_rerun
+```
+
+The script uses CPU, performs no model downloads, and refuses to overwrite an existing output directory. This experiment saves reports and predictions, not deployable checkpoints, and leaves the recommendation pipeline unchanged.
+
+#### Classifier successes, failures, and interpretation
+
+| Example / category | Expected behavior | Actual behavior | Success or failure? | Likely reason |
+| ------------------ | ----------------- | --------------- | ------------------- | ------------- |
+| Profile 35 / grant row 147: mental-health nonprofit and Harbor Impact Initiative | `match`: mental-health focus and no known generated rule violation | Selected PyTorch classifier predicted `match` | Success against the synthetic label | The grant explicitly supports mental-health services; the supplied revenue is below the cap. |
+| Profile 57 / grant row 103: nonprofit and Marigold Community Grant | `ineligible`: the grant requires a for-profit company | Selected PyTorch classifier predicted `match`; TF-IDF classifier predicted `ineligible` | Failure | Shared women's-entrepreneurship language may outweigh the entity restriction. A learned score must not replace explicit eligibility checks. |
+| Profile 5 / grant row 104: UK arts nonprofit and Tidewater Horizon Initiative | `match` under the generated rules | Selected PyTorch classifier predicted `unrelated` | Failure | The grant combines arts with women's empowerment; mixed focus wording may obscure the arts match. This is a hypothesis, not a verified cause. |
+
+- **What improved?** The selected MiniLM-L6 + PyTorch classifier reached test macro-F1 0.574 versus 0.503 for MiniLM-L6 + logistic regression and 0.304 for the majority baseline. Merely increasing the encoder size did not consistently help: MiniLM-L12 performed worse than L6, while MPNet improved macro-F1 and match recall over L6 logistic regression. These are classifier comparisons, not improvements measured in the live recommendation pipeline.
+- **What did not improve?** The selected classifier found only 13 of 54 true matches, versus 26 for MPNet. Of its 31 predicted matches, seven were labeled ineligible and eleven unrelated. Its higher overall macro-F1 therefore does not make it an acceptable replacement for eligibility checks. The majority baseline's 83.6% accuracy also shows why accuracy alone is inadequate. Synthetic labels sometimes conflict with information implied in descriptions because they use only structured attributes for eligibility; independent human labels are still needed.
+- **Next experiment (Jason):** Confirm the intended Ardook applicant profile and complete independent human labeling. Compare the MiniLM-L6 classifier and MPNet approach on held-out reviewed pairs, measuring macro-F1, match recall, and false matches. Before integration, compare recommendation Precision@5 on the same candidate sets while retaining deterministic eligibility checks. Use validation data for model selection and reserve test data for the final comparison. The synthetic comparison is complete; human-reviewed evaluation and evidence of improved real recommendations are still pending.
 
 ### Individual contributions during that week
 
 | Member | Work completed  | Result (worked / partly / failed) | Evidence | Next step   |
 | ------ | --------------- | --------------------------------- | -------- | ----------- |
-| Jason Wu | I created a human-labeling workflow with 160 organization–grant pairs using eight fictional applicant profiles and real tracker records. I added separate relevance and eligibility labels, review validation, and organization-level training/validation/test splits. I also implemented a logistic regression baseline and a PyTorch classifier training script with validation-based checkpoint selection and held-out evaluation. | Partly: the review dataset and training workflows are implemented, but the examples still need human labels. No improvement in recommendation quality has been established yet. | [Review workbook](outputs/ranking-review/ranking_review.xlsx), [dataset preparation](src/prepare_ranking_review.py), [review validation and baseline](src/ranking_classifier.py), [PyTorch training](src/train_pytorch.py) | Complete and validate human reviews, train the classifiers, and compare held-out relevance results before integrating a model into recommendations. |
+| Jason Wu | I created the 160-pair human-labeling workflow and logistic regression/PyTorch training scripts. I then implemented and ran six classifier configurations on the existing synthetic data, holding out both organizations and grants. I recorded accuracy, macro-F1, per-class metrics, confusion matrices, and representative failures. | Worked for the synthetic experiment: the validation-selected MiniLM-L6 + PyTorch classifier achieved 85.7% test accuracy and 0.574 macro-F1, but only 24.1% match recall. Human reviews and real-world improvement remain unverified. | [Review workbook](outputs/ranking-review/ranking_review.xlsx), [model comparison script](src/compare_models.py), [full results](results/model_comparison_v1/report.json), [test predictions](results/model_comparison_v1/test_predictions.json) | Complete human-reviewed evaluation, investigate missed matches and entity-rule errors, and compare ranking performance before integration. |
+| Michael Tiburcio | I improved the vector store so now it only re-embeds grants that changed and also made ranking based on semantic search with keyword matching and also now ignoring duplicate listings. | Worked: the precision went from 47.0% to 53.9% on our fake data and from 60% to 80% on the real tracker. | PR #6 (feature/vector-store-embeddings) | Fine-tune the embedding model on Jason's human labels once they're done. |
 | Seerat Kakar | I added a DeepSeek feature that extracts grant details from the spreadsheet. It checks extracted details against the original text and can use them to help rank grants. | Partly: no visible improvement in matching results yet. | `src/deepseek_extractor.py`, `src/recommend.py` | Evaluate whether DeepSeek-extracted details improve matching, then add a LoRA adapter to score candidate fit. |
 
 ---
