@@ -40,6 +40,20 @@ ARDOOK_ATTRIBUTES = {
     "women_led": "yes",
 }
 
+ARDOOK_DATA_DESCRIPTION = (
+    "Ardook is an early-stage, woman-led U.S. startup building AI, physical-AI and data "
+    "products with a social-impact mission."
+)
+PROFILES = {
+    "laundry": (ARDOOK_DESCRIPTION, ARDOOK_ATTRIBUTES,
+                {"region": "Armenia", "woman_led": "yes"}),
+    "ardook_data": (ARDOOK_DATA_DESCRIPTION,
+                    {"business_base_country": "US", "founder_residence_country": "US",
+                     "incorporation_country": "US", "armenia_region": "none (U.S.-based)",
+                     "women_led": "yes"},
+                    {"entity_type": "for-profit", "region": "US", "woman_led": "yes"}),
+}
+
 # Transcribed from the hidden workbook's Core Requirements, same convention as
 # src/real_eligibility.py: only unambiguous geography requirements are encoded.
 RULES = {
@@ -85,8 +99,6 @@ def load_hidden(path: Path) -> pd.DataFrame:
     return grants
 
 
-# Same vocabulary as the synthetic profiles the classifier was trained on.
-CLASSIFIER_ATTRIBUTES = {"region": "Armenia", "woman_led": "yes"}
 
 
 def run_pytorch(grants: pd.DataFrame, args) -> None:
@@ -99,8 +111,9 @@ def run_pytorch(grants: pd.DataFrame, args) -> None:
 
     torch.set_num_threads(4)
     partitions = load_partitions()
-    organization = ARDOOK_DESCRIPTION + "\nApplicant facts: " + json.dumps(
-        CLASSIFIER_ATTRIBUTES, sort_keys=True)
+    description, _, classifier_attributes = PROFILES[args.profile]
+    organization = description + "\nApplicant facts: " + json.dumps(
+        classifier_attributes, sort_keys=True)
     hidden = [(organization, "\n".join(str(row[f] if pd.notna(row[f]) else "") for f in
                ("program", "type", "core_requirements", "amount_benefit")))
               for _, row in grants.iterrows()]
@@ -148,6 +161,8 @@ def main() -> None:
     parser.add_argument("--no-rules", action="store_true", help="Semantic relevance only.")
     parser.add_argument("--classifier", choices=("pipeline", "pytorch"), default="pipeline",
                         help="pytorch: Week 7 MiniLM-L6 + PyTorch MLP (label 'match' = Relevant).")
+    parser.add_argument("--profile", choices=sorted(PROFILES), default="laundry",
+                        help="laundry: About Us page; ardook_data: README / tracker profile.")
     args = parser.parse_args()
 
     grants = load_hidden(args.workbook)
@@ -163,9 +178,10 @@ def main() -> None:
             if rule.evidence not in row.iloc[0]["core_requirements"]:
                 raise ValueError(f"Evidence changed for {program}: {rule.evidence}")
     pipeline = Pipeline(grants=grants, checker=checker, store=MemoryStore())
-    profile = OrganizationProfile(ARDOOK_DESCRIPTION, ARDOOK_ATTRIBUTES)
+    description, attributes, _ = PROFILES[args.profile]
+    profile = OrganizationProfile(description, attributes)
 
-    query = pipeline._normalize(pipeline.embedder.encode([ARDOOK_DESCRIPTION]))[0]
+    query = pipeline._normalize(pipeline.embedder.encode([description]))[0]
     _, relevance = pipeline._dense_scores(query)
 
     rows = []
@@ -192,7 +208,7 @@ def main() -> None:
         writer.writerows({k: r[k] for k in ("grant_id", "label", "reason")} for r in rows)
     details = args.output.with_name(args.output.stem + "_details.json")
     details.write_text(json.dumps({"threshold": args.threshold, "rules": not args.no_rules,
-                                   "description": ARDOOK_DESCRIPTION, "rows": rows}, indent=2))
+                                   "profile": args.profile, "description": description, "rows": rows}, indent=2))
     for r in rows:
         print(f"{r['grant_id']:>2}  {r['label']:<13} {r['score']:.3f}  {r['program']}")
     print(f"\nWrote {args.output} and {details}")
