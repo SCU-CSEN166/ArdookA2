@@ -1,0 +1,11 @@
+grant_id,label,reason
+1,Relevant,Mission fit (relevance 0.344 >= 0.2); eligibility needs verification
+2,Not relevant,Ineligible: requires Aragatsotn Province
+3,Not relevant,Low mission fit (relevance 0.197 < 0.2)
+4,Relevant,Mission fit (relevance 0.274 >= 0.2); eligibility needs verification
+5,Relevant,Mission fit (relevance 0.305 >= 0.2); eligibility needs verification
+6,Not relevant,"Ineligible: requires Tavush, Lori, Shirak and Gegharkunik provinces"
+7,Relevant,Mission fit (relevance 0.218 >= 0.2); eligibility needs verification
+8,Relevant,Mission fit (relevance 0.236 >= 0.2); eligibility needs verification
+9,Not relevant,Ineligible: requires working outside Yerevan
+10,Relevant,Mission fit (relevance 0.358 >= 0.2); eligibility needs verification

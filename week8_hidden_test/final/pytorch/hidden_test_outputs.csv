@@ -1,0 +1,11 @@
+grant_id,label,reason
+1,Not relevant,Classifier predicted unrelated (no shared focus)
+2,Not relevant,Classifier predicted unrelated (no shared focus)
+3,Not relevant,Classifier predicted unrelated (no shared focus)
+4,Relevant,"Classifier predicted match (shared focus, no known rule violation)"
+5,Not relevant,Classifier predicted ineligible (shared focus but a rule is violated)
+6,Not relevant,Classifier predicted unrelated (no shared focus)
+7,Not relevant,Classifier predicted ineligible (shared focus but a rule is violated)
+8,Not relevant,Classifier predicted unrelated (no shared focus)
+9,Not relevant,Classifier predicted unrelated (no shared focus)
+10,Relevant,"Classifier predicted match (shared focus, no known rule violation)"
