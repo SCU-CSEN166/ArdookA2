@@ -213,7 +213,7 @@ The script uses CPU, performs no model downloads, and refuses to overwrite an ex
 | ------ | --------------- | --------------------------------- | -------- | ----------- |
 | Michael Tiburcio | Built a simple frontend to make testing easier, so you can upload a CSV/Excel file of grants or paste one grant and get Relevant / Not relevant back. Also wrote a parser that handles different column names, blank rows and messy files. To run it, use "pip install -r requirements.txt" then "streamlit run app.py" | Worked |  00163026e64da2453ba5d52a8a364e6363ae6b54 | Add a few more features to the frontend, help improve the PyTorch pipeline, use less strict thresholds so it doesn't reject almost everything, and retrain |
 | Jason Wu | | | | |
-| Seerat Kakar | | | | |
+| Seerat Kakar | Added a pairing table feature to the PyTorch model, which crosses each applicant fact (entity type, region, woman-led) with each grant requirement, so the model can learn which combinations make an applicant ineligible. I also generated extra training pairs worded like the real tracker, added Armenia as a region, saved the trained model, and added a LoRA stage to the PyTorch model, which improved validation macro-F1 slightly, from 0.872 to 0.880. Result: hidden test F1 0.83 (precision 0.71, recall 1.00) vs the final labels, up from 0.57 for the earlier PyTorch model. | Worked. | `src/train_pytorch.py`, `src/augment_pairs.py`, `src/train_pairing.py`, `src/pytorch_classifier.py`, `app.py`; commit `f548bc4` | Try replacing the regex matching of grant requirements with the DeepSeek extractor so the pairing table works on new wording, and maybe add more requirement types (startup stage, sector). |
 
 ---
 
@@ -248,7 +248,7 @@ The script uses CPU, performs no model downloads, and refuses to overwrite an ex
 
 | Member | Final implementation / evaluation / documentation contribution | Result (worked / partly / failed) | Evidence | Reflection / remaining work |
 | ------ | -------------------------------------------------------------- | --------------------------------- | -------- | --------------------------- |
-| Seerat Kakar | Added a pairing table feature to the PyTorch model, which crosses each applicant fact (entity type, region, woman-led) with each grant requirement, so the model can learn which combinations make an applicant ineligible. I also generated extra training pairs worded like the real tracker, added Armenia as a region, saved the trained model, and added a LoRA stage to the PyTorch model, which improved validation macro-F1 slightly, from 0.872 to 0.880. Result: hidden test F1 0.83 (precision 0.71, recall 1.00) vs the final labels, up from 0.57 for the earlier PyTorch model. | Worked. | `src/train_pytorch.py`, `src/augment_pairs.py`, `src/train_pairing.py`, `src/pytorch_classifier.py`, `app.py`; commit `f548bc4` | Try replacing the regex matching of grant requirements with the DeepSeek extractor so the pairing table works on new wording, and maybe add more requirement types (startup stage, sector). |
+| [Name] | [Specific work]                                                | [Status]                          | [Link]   | [Reflection]                |
 
 ### Final submission checklist
 
