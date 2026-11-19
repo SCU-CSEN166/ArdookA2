@@ -1,0 +1,11 @@
+grant_id,program,ta_label,synthetic only (Week 7 baseline),synthetic + real (x1),synthetic + real (x2),synthetic + real (x5),synthetic + real (x10),synthetic + real (x20)
+1,Cisco Global Problem Solver Challenge 2027,Relevant,unrelated,match,match,match,unrelated,match
+2,Women's Fund Armenia - Small Grants for Women-Led Initiatives in Aragatsotn,Not relevant,unrelated,match,match,match,match,match
+3,Tory Burch Foundation Fellows Program,Not relevant,unrelated,unrelated,unrelated,unrelated,unrelated,match
+4,AWS Activate (Founders tier),Relevant,match,match,match,match,match,match
+5,Women Founders Network Fast Pitch 2027,Relevant,ineligible,match,match,match,match,match
+6,IOM ELEVATE Business Grants,Not relevant,unrelated,match,match,match,match,match
+7,TiE Women Global Pitch Competition 2026,Relevant,ineligible,match,match,match,match,match
+8,D-Prize Global Competition,Not relevant,unrelated,match,match,match,unrelated,match
+9,People in Need - Grant Call for Armenian Civil Society Organisations,Not relevant,unrelated,match,unrelated,unrelated,unrelated,unrelated
+10,Women Who Tech - Tech Startup Grant,Relevant,match,match,match,match,match,match

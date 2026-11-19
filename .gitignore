@@ -1,8 +1,15 @@
 .venv/
 __pycache__/
 *.pyc
+.pytest_cache/
+.DS_Store
+*.log
 vector_store/
 vector_store_synthetic/
 vector_store_synthetic_eval/
 models/
 .cache/
+.claude/
+.agents/
+.streamlit/secrets.toml
+NOTES.md

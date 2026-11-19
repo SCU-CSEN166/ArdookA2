@@ -161,7 +161,7 @@ def main() -> None:
     parser.add_argument("--no-rules", action="store_true", help="Semantic relevance only.")
     parser.add_argument("--classifier", choices=("pipeline", "pytorch"), default="pipeline",
                         help="pytorch: Week 7 MiniLM-L6 + PyTorch MLP (label 'match' = Relevant).")
-    parser.add_argument("--profile", choices=sorted(PROFILES), default="laundry",
+    parser.add_argument("--profile", choices=sorted(PROFILES), default="ardook_data",
                         help="laundry: About Us page; ardook_data: README / tracker profile.")
     args = parser.parse_args()
 
