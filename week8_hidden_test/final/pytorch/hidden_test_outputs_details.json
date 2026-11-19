@@ -2,7 +2,7 @@
   "classifier": "all-MiniLM-L6-v2 + PyTorch MLP",
   "threshold": "Relevant iff predicted class == match",
   "best_epoch": 19,
-  "organization_text": "Ardook is an award-winning social enterprise in Yerevan, Armenia, expanding to Georgia. It employs mothers of children with disabilities, many of them single mothers, who wash and iron clothes professionally from home with equipment, training and support from Ardook, while couriers handle pickup and delivery. It serves individuals, hotels, restaurants, preschools and beauty salons, creating decent work and reducing inequalities (UN SDG 8 and 10) with eco-friendly reusable bags and recycled hangers.\nApplicant facts: {\"region\": \"Armenia\", \"woman_led\": \"yes\"}",
+  "organization_text": "Ardook is an early-stage, woman-led U.S. startup building AI, physical-AI and data products with a social-impact mission.\nApplicant facts: {\"entity_type\": \"for-profit\", \"region\": \"US\", \"woman_led\": \"yes\"}",
   "rows": [
     {
       "grant_id": 1,
@@ -27,30 +27,30 @@
     },
     {
       "grant_id": 4,
-      "label": "Not relevant",
-      "reason": "Classifier predicted unrelated (no shared focus)",
-      "predicted_class": "unrelated",
+      "label": "Relevant",
+      "reason": "Classifier predicted match (shared focus, no known rule violation)",
+      "predicted_class": "match",
       "program": "AWS Activate (Founders tier)"
     },
     {
       "grant_id": 5,
       "label": "Not relevant",
-      "reason": "Classifier predicted unrelated (no shared focus)",
-      "predicted_class": "unrelated",
+      "reason": "Classifier predicted ineligible (shared focus but a rule is violated)",
+      "predicted_class": "ineligible",
       "program": "Women Founders Network Fast Pitch 2027"
     },
     {
       "grant_id": 6,
       "label": "Not relevant",
-      "reason": "Classifier predicted ineligible (shared focus but a rule is violated)",
-      "predicted_class": "ineligible",
+      "reason": "Classifier predicted unrelated (no shared focus)",
+      "predicted_class": "unrelated",
       "program": "IOM ELEVATE Business Grants"
     },
     {
       "grant_id": 7,
       "label": "Not relevant",
-      "reason": "Classifier predicted unrelated (no shared focus)",
-      "predicted_class": "unrelated",
+      "reason": "Classifier predicted ineligible (shared focus but a rule is violated)",
+      "predicted_class": "ineligible",
       "program": "TiE Women Global Pitch Competition 2026"
     },
     {
@@ -63,15 +63,15 @@
     {
       "grant_id": 9,
       "label": "Not relevant",
-      "reason": "Classifier predicted ineligible (shared focus but a rule is violated)",
-      "predicted_class": "ineligible",
+      "reason": "Classifier predicted unrelated (no shared focus)",
+      "predicted_class": "unrelated",
       "program": "People in Need - Grant Call for Armenian Civil Society Organisations"
     },
     {
       "grant_id": 10,
-      "label": "Not relevant",
-      "reason": "Classifier predicted unrelated (no shared focus)",
-      "predicted_class": "unrelated",
+      "label": "Relevant",
+      "reason": "Classifier predicted match (shared focus, no known rule violation)",
+      "predicted_class": "match",
       "program": "Women Who Tech - Tech Startup Grant"
     }
   ]

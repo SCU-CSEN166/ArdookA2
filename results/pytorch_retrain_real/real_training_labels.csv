@@ -1,0 +1,38 @@
+program,fit,label,split
+UNICEF Venture Fund,Moderate,unrelated,train
+Twilio AI Startup Searchlight 2026,Moderate,unrelated,train
+Credibly Small Business Award,Moderate,unrelated,train
+Cartier Women’s Initiative – Science & Technology Pioneer Award,Strong if deep-tech criteria met,match,train
+Rural AI Catalyst Fund,Weak–Moderate,unrelated,train
+Foundry3 Agentic AI Accelerator,Strong,match,train
+Llama Impact Grants,Strong,match,train
+100x Impact Accelerator 2027/28,Strong,match,train
+NSF America’s Seed Fund (SBIR/STTR Phase I),Strong if novel R&D; otherwise Moderate,match,train
+Google for Startups Women Founders Fund,Excellent if a matching round opens,match,train
+Hello Alice + Google Main Street Rising AI Pitch,Moderate–Strong,unrelated,train
+Hey Helen Grant (Visionaries),Strong,match,train
+Women TechEU 2026–2028,Excellent,match,train
+EchoHer Founder Fellowship,Excellent,match,train
+Mozilla Responsible Computing Challenge 2026,Moderate,unrelated,train
+Giving Joy Grant,Moderate,unrelated,train
+Google.org GenAI / AI Social Impact Accelerator,Excellent if matching call opens,match,train
+GTIA Grants,Moderate,unrelated,train
+Fast Forward Accelerator 2027,Excellent only if nonprofit,ineligible,train
+WomensNet Amber Grant / Startup Grant,Strong,match,train
+Humanity AI funding/program,Moderate,unrelated,train
+AI for Good Innovation Factory,Moderate,unrelated,train
+Google for Startups Accelerator: United States,Strong,match,train
+Oasis Collective × AI After 5 – Women in AI Pitch Competition (SF),Excellent,match,train
+Google.org Impact Challenge – AI for Science,Moderate,unrelated,train
+Her Agenda Breakthrough Grant,Strong,match,train
+Accelerate California Innovation Grants,Strong,match,train
+Tara’s Circle 2026,Excellent,match,validation
+High Five Grant for Moms,Strong,match,validation
+NetHope AI Accelerator,Strong,match,validation
+Tata Social Enterprise Challenge 2026,Strong if India impact,match,validation
+She Believed She Could – Iconic Impact / Emerging Founder Grant,Strong,match,validation
+NVIDIA Inception,Strong,match,validation
+AI Civic Action Accelerator,Moderate,unrelated,validation
+Google.org Impact Challenge – AI for Government Innovation,Moderate–Strong thematically,unrelated,validation
+DivInc Women in Tech Accelerator,Strong thematic fit; low practical fit,ineligible,validation
+America250 Community Futures Challenge,Moderate,unrelated,validation
