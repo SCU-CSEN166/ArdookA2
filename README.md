@@ -235,7 +235,7 @@ Scored once, after selection was frozen:
 | Ardook dev grants, out-of-fold (19, 11 match) | **Selected** | 0.774 | 0.77 | 0.91 | [[5, 3], [1, 10]] |
 | Week 8 hidden test (10, TA labels, run once after freezing) | **Selected** | — | 1.00 | 0.60 | accuracy 0.80; 3 TP, 0 FP, 2 FN, 5 TN |
 
-On synthetic test, 27 of the 30 false matches are `ineligible` pairs (a requirement the generator checks with rules that are not always written in the text). The pre-registered success criteria were all met, but the real evidence is small: 9 held-out grants (6 correct) plus 10 hidden-test grants. This does not establish real-world accuracy.
+On synthetic test, 27 of the 30 false matches are `ineligible` pairs (a requirement the generator checks with rules that are not always written in the text). The pre-registered success criteria were all met, but the real evidence is small: 9 held-out grants (6 correct) plus 10 hidden-test grants. This does not establish real-world accuracy. Before training, one audit command also printed the first two rows of the hidden-test labels; they were not used for training, selection or thresholds (see the protocol).
 
 Ardook held-out errors: **GTIA Grants** (requires a nonprofit; Ardook's entity type is unknown, so the model cannot rule it out) and **Credibly Small Business Award** (needs 6 months operating and revenue) were predicted matches; **Foundry3 Agentic AI Accelerator** (P = 0.23) was missed. Hidden-test misses: AWS Activate and Women Who Tech. Every grant's prediction is in [ardook_predictions.csv](results/ardook_match_v1/ardook_predictions.csv); dev grants show their out-of-fold score because the final model was trained on them.
 
@@ -255,7 +255,7 @@ HF_HUB_OFFLINE=1 .venv/bin/python -m src.predict_match --description "A U.S. non
 
 | Member | Work completed  | Result (worked / partly / failed) | Evidence | Next step   |
 | ------ | --------------- | --------------------------------- | -------- | ----------- |
-| [Name] | [Specific work] | [Status]                          | [Link]   | [Next step] |
+| Jason Wu | I trained a grant-matching classifier using the clean synthetic data and real Ardook grants. I compared models and evaluated the selected model on held-out synthetic, real, and hidden test cases. | Worked: it found 4 of 5 real held-out matches with 2 false positives, and got 8 of 10 hidden test cases correct. | [Training script](src/train_match_classifier.py), [saved report](results/ardook_match_v1/report.json), [hidden-test metrics](results/ardook_match_v1/hidden_test/metrics.csv) | Conduct more evaluation and possible hyperparameter tuning. |
 
 ---
 
