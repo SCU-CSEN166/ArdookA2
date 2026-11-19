@@ -9,8 +9,5 @@ scikit-learn>=1.5,<2
 scipy>=1.11,<2
 joblib>=1.3,<2
 torch>=2.2,<3
-<<<<<<< HEAD
 peft>=0.13,<1
-=======
 streamlit>=1.40,<2
->>>>>>> origin/main
