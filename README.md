@@ -191,15 +191,15 @@ The script uses CPU, performs no model downloads, and refuses to overwrite an ex
 
 **Deliverable during Week 9 Lab:** Hidden-test results (as provided by the TA), analysis of at least three important failure cases, and a prioritized improvement plan.
 
-- **Submitted system version / commit:** [Commit hash]
-- **Hidden-test metrics and leaderboard result:** [Results, when available]
-- **Difference from development results:** [Compare; do not assume the hidden set is identical]
+- **Submitted system version / commit:** `fa942e7` on main. The frontend scores with the match classifier. The pairing-table PyTorch model is in `models/pytorch_pairing_v1`.
+- **Hidden-test metrics and leaderboard result:** We scored 10 hidden grants against our own labels (no leaderboard result yet). The pairing-table PyTorch model got F1 0.83 (precision 0.71, recall 1.00). The match classifier got F1 0.75 (precision 1.00, recall 0.60). The pipeline with rules got F1 0.91, and the earlier PyTorch model got 0.57.
+- **Difference from development results:** The pairing model scored 97.6% accuracy (macro-F1 0.93) on our synthetic test set, but only F1 0.83 on the hidden grants. That's expected, because the synthetic labels come from the same rules the model learned. The hidden set is real grants and has only 10 rows, so one grant changes the score a lot.
 
 | Failure case / category | What went wrong | Possible cause | Severity / user impact | Proposed fix |
 | ----------------------- | --------------- | -------------- | ---------------------- | ------------ |
-| [Case 1]                | [Observation]   | [Hypothesis]   | [Impact]               | [Fix]        |
-| [Case 2]                | [Observation]   | [Hypothesis]   | [Impact]               | [Fix]        |
-| [Case 3]                | [Observation]   | [Hypothesis]   | [Impact]               | [Fix]        |
+| Tory Burch Fellows (#3) | The pairing model said Relevant, but the grant needs at least USD 75K in annual revenue and Ardook is early-stage. | We only read revenue caps written like "under $50k", so "at least USD 75K" is missed. | High: tells them to apply for something they can't win. | Read minimum-revenue wording too, using the DeepSeek extractor. |
+| D-Prize (#8) | The pairing model said Relevant, but the grant is for ventures distributing proven poverty interventions, not AI or data products. | The pairing table only checks entity type, region and woman-led, so a topic mismatch is left to the text features. | Medium: wastes time on a grant that doesn't fit the product. | Add a sector or venture-type requirement, and more synthetic examples of it. |
+| AWS Activate (#4) and Women Who Tech (#10) | The match classifier marked both Not relevant, but both are Relevant, so it missed 2 of 5. | Its decision threshold (0.25) is strict, and it scored them low (0.03 and 0.18). | Medium: a good grant doesn't get shown. | Lower the threshold a bit, or combine it with the pairing model's recall. |
 
 ### Changes attempted after stress-testing
 
