@@ -1,0 +1,77 @@
+{
+  "threshold": 0.2,
+  "rules": true,
+  "description": "Ardook is an award-winning social enterprise in Yerevan, Armenia, expanding to Georgia. It employs mothers of children with disabilities, many of them single mothers, who wash and iron clothes professionally from home with equipment, training and support from Ardook, while couriers handle pickup and delivery. It serves individuals, hotels, restaurants, preschools and beauty salons, creating decent work and reducing inequalities (UN SDG 8 and 10) with eco-friendly reusable bags and recycled hangers.",
+  "rows": [
+    {
+      "grant_id": 1,
+      "label": "Not relevant",
+      "reason": "Low mission fit (relevance 0.193 < 0.2)",
+      "score": 0.1926,
+      "program": "Cisco Global Problem Solver Challenge 2027"
+    },
+    {
+      "grant_id": 2,
+      "label": "Not relevant",
+      "reason": "Ineligible: requires Aragatsotn Province",
+      "score": 0.3622,
+      "program": "Women's Fund Armenia - Small Grants for Women-Led Initiatives in Aragatsotn"
+    },
+    {
+      "grant_id": 3,
+      "label": "Not relevant",
+      "reason": "Ineligible: requires operating in the U.S.",
+      "score": 0.2065,
+      "program": "Tory Burch Foundation Fellows Program"
+    },
+    {
+      "grant_id": 4,
+      "label": "Not relevant",
+      "reason": "Low mission fit (relevance 0.140 < 0.2)",
+      "score": 0.1397,
+      "program": "AWS Activate (Founders tier)"
+    },
+    {
+      "grant_id": 5,
+      "label": "Not relevant",
+      "reason": "Ineligible: requires U.S.-based for-profit",
+      "score": 0.1649,
+      "program": "Women Founders Network Fast Pitch 2027"
+    },
+    {
+      "grant_id": 6,
+      "label": "Not relevant",
+      "reason": "Ineligible: requires Tavush, Lori, Shirak and Gegharkunik provinces",
+      "score": 0.395,
+      "program": "IOM ELEVATE Business Grants"
+    },
+    {
+      "grant_id": 7,
+      "label": "Not relevant",
+      "reason": "Low mission fit (relevance 0.157 < 0.2)",
+      "score": 0.1566,
+      "program": "TiE Women Global Pitch Competition 2026"
+    },
+    {
+      "grant_id": 8,
+      "label": "Relevant",
+      "reason": "Mission fit (relevance 0.215 >= 0.2); eligibility needs verification",
+      "score": 0.2151,
+      "program": "D-Prize Global Competition"
+    },
+    {
+      "grant_id": 9,
+      "label": "Not relevant",
+      "reason": "Ineligible: requires working outside Yerevan",
+      "score": 0.3559,
+      "program": "People in Need - Grant Call for Armenian Civil Society Organisations"
+    },
+    {
+      "grant_id": 10,
+      "label": "Not relevant",
+      "reason": "Low mission fit (relevance 0.186 < 0.2)",
+      "score": 0.1861,
+      "program": "Women Who Tech - Tech Startup Grant"
+    }
+  ]
+}

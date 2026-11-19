@@ -1,0 +1,11 @@
+grant_id,label,reason
+1,Not relevant,Low mission fit (relevance 0.193 < 0.2)
+2,Not relevant,Ineligible: requires Aragatsotn Province
+3,Not relevant,Ineligible: requires operating in the U.S.
+4,Not relevant,Low mission fit (relevance 0.140 < 0.2)
+5,Not relevant,Ineligible: requires U.S.-based for-profit
+6,Not relevant,"Ineligible: requires Tavush, Lori, Shirak and Gegharkunik provinces"
+7,Not relevant,Low mission fit (relevance 0.157 < 0.2)
+8,Relevant,Mission fit (relevance 0.215 >= 0.2); eligibility needs verification
+9,Not relevant,Ineligible: requires working outside Yerevan
+10,Not relevant,Low mission fit (relevance 0.186 < 0.2)

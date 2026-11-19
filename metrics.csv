@@ -1,0 +1,3 @@
+system,accuracy,precision,recall,f1,tp,fp,fn,tn
+PyTorch MLP,0.70,1.000,0.400,0.571,2,0,3,5
+Pipeline + rules,0.90,0.833,1.000,0.909,5,1,0,4
