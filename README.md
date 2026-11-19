@@ -217,8 +217,7 @@ The script uses CPU, performs no model downloads, and refuses to overwrite an ex
 | Seerat Kakar | Added a pairing table feature to the PyTorch model, which crosses each applicant fact (entity type, region, woman-led) with each grant requirement, so the model can learn which combinations make an applicant ineligible. I also generated extra training pairs worded like the real tracker, added Armenia as a region, saved the trained model, and added a LoRA stage to the PyTorch model, which improved validation macro-F1 slightly, from 0.872 to 0.880. | Worked. Result: hidden test F1 0.83 (precision 0.71, recall 1.00) vs the final labels, up from 0.57 for the earlier PyTorch model. | `src/train_pytorch.py`, `src/augment_pairs.py`, `src/train_pairing.py`, `src/pytorch_classifier.py`, `app.py`; commit `f548bc4` | Try replacing the regex matching of grant requirements with the DeepSeek extractor so the pairing table works on new wording, and maybe add more requirement types (startup stage, sector). |
 
 # How to run the app
-`
-cd /Users/jasonwu/ArdookA2
+`cd /Users/jasonwu/ArdookA2
 git fetch origin
 git worktree add --detach /tmp/ardook-frontend origin/main
 cd /tmp/ardook-frontend
@@ -227,8 +226,7 @@ source /Users/jasonwu/ArdookA2/.venv/bin/activate
 pip install -r requirements.txt
 
 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
-python -m streamlit run app.py
-`
+python -m streamlit run app.py`
 
 ---
 
