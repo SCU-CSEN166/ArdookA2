@@ -241,11 +241,11 @@ The script uses CPU, performs no model downloads, and refuses to overwrite an ex
 
 ### Peer testing
 
-- **Team evaluated:** [Team ID]
-- **One thing that worked well:** [Evidence]
-- **One meaningful failure:** [Reproduction steps or example]
-- **One actionable recommendation:** [Specific fix]
-- **Feedback received from another team:** [Summary]
+- **Team evaluated:** Ardook3
+- **One thing that worked well:** The CPU-only test worked after we installed the 2 Hugging Face models and we were able to get the expected results..
+- **One meaningful failure:** We tried testing it on our own data but because it was different structure then what their code expects, it was not able to run.
+- **One actionable recommendation:** Making it more reproducible and able to handle unique inputs would make their model stronger.
+- **Feedback received from another team:** We need better documentation like how to run and install everything in one section like "How to run" at the end. Otherwise, it's good and model performance is strong.
 
 ### Responsible AI assessment
 
