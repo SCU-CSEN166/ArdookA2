@@ -89,7 +89,7 @@ def embedding_features(texts, name):
     return {s: scaler.transform(x).astype(np.float32) for s, x in features.items()}
 
 
-def train_mlp(features, labels):
+def fit_mlp(features, labels):
     torch.manual_seed(SEED)
     model = nn.Sequential(nn.Linear(features["train"].shape[1], 64), nn.ReLU(),
                           nn.Dropout(0.2), nn.Linear(64, len(LABELS)))
@@ -117,8 +117,14 @@ def train_mlp(features, labels):
             best_score, best_state, best_epoch = score, deepcopy(model.state_dict()), epoch
     model.load_state_dict(best_state)
     model.eval()
+    return model, best_epoch, history
+
+
+def train_mlp(features, labels):
+    model, best_epoch, history = fit_mlp(features, labels)
     with torch.no_grad():
-        predictions = {s: model(xs[s]).argmax(1).numpy() for s in ("validation", "test")}
+        predictions = {s: model(torch.from_numpy(features[s])).argmax(1).numpy()
+                       for s in ("validation", "test")}
     return predictions, {"best_epoch": best_epoch, "history": history,
                          "hidden_units": 64, "dropout": 0.2, "batch_size": 128, "learning_rate": 0.001}
 
