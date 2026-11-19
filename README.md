@@ -214,7 +214,9 @@ The script uses CPU, performs no model downloads, and refuses to overwrite an ex
 
 | Member | Work completed  | Result (worked / partly / failed) | Evidence | Next step   |
 | ------ | --------------- | --------------------------------- | -------- | ----------- |
-| [Name] | [Specific work] | [Status]                          | [Link]   | [Next step] |
+| Michael Tiburcio | Built a simple frontend to make testing easier, so you can upload a CSV/Excel file of grants or paste one grant and get Relevant / Not relevant back. Also wrote a parser that handles different column names, blank rows and messy files. To run it, use "pip install -r requirements.txt" then "streamlit run app.py" | Worked |  00163026e64da2453ba5d52a8a364e6363ae6b54 | Add a few more features to the frontend, help improve the PyTorch pipeline, use less strict thresholds so it doesn't reject almost everything, and retrain |
+| Jason Wu | | | | |
+| Seerat Kakar | | | | |
 
 ---
 
