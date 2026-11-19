@@ -208,12 +208,6 @@ The script uses CPU, performs no model downloads, and refuses to overwrite an ex
 | [Change] | [Status]                    | [Result] | [Decision]               |
 | Frontend (`streamlit run app.py`) now scores with the saved match classifier (`results/ardook_match_v1/model.joblib`, threshold 0.25, offline encoder) | Yes | Same scores as `python -m src.predict_match --ardook` on both workbooks; `tests/test_app_predict.py` | Keep |
 
-**Running the frontend** (`streamlit run app.py`): the app works offline, so the BGE encoder it uses has to be on your computer first. pip doesn't download it. Run this once while you're online (about 1.2 GB), then start the app:
-  ```
-  python -c "from sentence_transformers import SentenceTransformer as S; S('BAAI/bge-large-en-v1.5')"
-  ```
-  If you skip this, the app shows an error saying it can't connect to huggingface.co.
-
 ### Individual contributions during that week
 
 | Member | Work completed  | Result (worked / partly / failed) | Evidence | Next step   |
@@ -221,6 +215,12 @@ The script uses CPU, performs no model downloads, and refuses to overwrite an ex
 | Michael Tiburcio | Built a simple frontend to make testing easier, so you can upload a CSV/Excel file of grants or paste one grant and get Relevant / Not relevant back. Also wrote a parser that handles different column names, blank rows and messy files. To run it, use "pip install -r requirements.txt" then "streamlit run app.py" | Worked |  00163026e64da2453ba5d52a8a364e6363ae6b54 | Add a few more features to the frontend, help improve the PyTorch pipeline, use less strict thresholds so it doesn't reject almost everything, and retrain |
 | Jason Wu | I trained a grant-matching classifier on clean synthetic data and real Ardook grants. I compared models and tested it on synthetic, real, and hidden test cases. | Worked: it found 4 of 5 real held-out matches with 2 false positives, and got 8 of 10 hidden test cases correct. | [Training script](src/train_match_classifier.py), [saved report](results/ardook_match_v1/report.json), [hidden-test metrics](results/ardook_match_v1/hidden_test/metrics.csv) | Conduct more evaluation and possible hyperparameter tuning. |
 | Seerat Kakar | Added a pairing table feature to the PyTorch model, which crosses each applicant fact (entity type, region, woman-led) with each grant requirement, so the model can learn which combinations make an applicant ineligible. I also generated extra training pairs worded like the real tracker, added Armenia as a region, saved the trained model, and added a LoRA stage to the PyTorch model, which improved validation macro-F1 slightly, from 0.872 to 0.880. | Worked. Result: hidden test F1 0.83 (precision 0.71, recall 1.00) vs the final labels, up from 0.57 for the earlier PyTorch model. | `src/train_pytorch.py`, `src/augment_pairs.py`, `src/train_pairing.py`, `src/pytorch_classifier.py`, `app.py`; commit `f548bc4` | Try replacing the regex matching of grant requirements with the DeepSeek extractor so the pairing table works on new wording, and maybe add more requirement types (startup stage, sector). |
+
+**Running the frontend** (`streamlit run app.py`): the app works offline, so the BGE encoder it uses has to be on your computer first. pip doesn't download it. Run this once while you're online (about 1.2 GB), then start the app:
+  ```
+  python -c "from sentence_transformers import SentenceTransformer as S; S('BAAI/bge-large-en-v1.5')"
+  ```
+  If you skip this, the app shows an error saying it can't connect to huggingface.co.
 
 # How to run the app
 `cd ~/ArdookA2`
@@ -230,9 +230,8 @@ The script uses CPU, performs no model downloads, and refuses to overwrite an ex
 
 `source ~/ArdookA2/.venv/bin/activate`
 `pip install -r requirements.txt`
-
-`HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
-python -m streamlit run app.py`
+ 
+`HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m streamlit run app.py`
 
 ---
 
