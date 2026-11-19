@@ -194,7 +194,7 @@ def _profile(rng: random.Random, number: int) -> tuple[tuple, str]:
         if rng.random() < 0.10:
             del attributes[key]
     what = rng.choice(FOCUS[focus][1])
-    noun = {"nonprofit": "nonprofit", "for-profit": "social enterprise", "university": "universien testty research lab"}[entity]
+    noun = {"nonprofit": "nonprofit", "for-profit": "social enterprise", "university": "university research lab"}[entity]
     text = rng.choice(
         [
             f"A {noun} providing {what}.",
