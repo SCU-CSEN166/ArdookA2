@@ -1,0 +1,11 @@
+grant_id,program,p_not_match,p_match,predicted,p_shared_focus,p_no_requirement_conflict
+1,Cisco Global Problem Solver Challenge 2027,0.0937,0.9063,match,0.9829,0.9221
+2,Women's Fund Armenia - Small Grants for Women-Led Initiatives in Aragatsotn,0.9906,0.0094,not_match,0.4469,0.0209
+3,Tory Burch Foundation Fellows Program,0.968,0.032,not_match,0.998,0.032
+4,AWS Activate (Founders tier),0.9694,0.0306,not_match,0.0446,0.6863
+5,Women Founders Network Fast Pitch 2027,0.6677,0.3323,match,0.9997,0.3324
+6,IOM ELEVATE Business Grants,0.9856,0.0144,not_match,0.0777,0.1858
+7,TiE Women Global Pitch Competition 2026,0.1816,0.8184,match,0.8315,0.9843
+8,D-Prize Global Competition,0.9182,0.0818,not_match,0.7455,0.1097
+9,People in Need - Grant Call for Armenian Civil Society Organisations,0.9901,0.0099,not_match,0.0254,0.3886
+10,Women Who Tech - Tech Startup Grant,0.8196,0.1804,not_match,0.9996,0.1805

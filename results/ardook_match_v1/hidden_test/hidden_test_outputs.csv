@@ -1,0 +1,11 @@
+grant_id,label,reason
+1,Relevant,P(match)=0.906 from the frozen match classifier
+2,Not relevant,P(match)=0.009 from the frozen match classifier
+3,Not relevant,P(match)=0.032 from the frozen match classifier
+4,Not relevant,P(match)=0.031 from the frozen match classifier
+5,Relevant,P(match)=0.332 from the frozen match classifier
+6,Not relevant,P(match)=0.014 from the frozen match classifier
+7,Relevant,P(match)=0.818 from the frozen match classifier
+8,Not relevant,P(match)=0.082 from the frozen match classifier
+9,Not relevant,P(match)=0.010 from the frozen match classifier
+10,Not relevant,P(match)=0.180 from the frozen match classifier

@@ -99,3 +99,8 @@ Meeting these criteria would not establish real-world accuracy.
    trains the second stage. Regularization (C = 0.1 and 1.0) was chosen on synthetic validation.
    No synthetic test pair or held-out real grant was used for this.
 2. The smoke run wrote its outputs to a scratch folder only; its numbers are not reported.
+3. **Hidden-test exposure.** While auditing the repo, before any training, one inspection command
+   printed the header and first two rows of `week8_hidden_test/ta_expected_labels.csv`
+   (grant 1 "Good", grant 2 "Bad"). The file was not opened again until the model and threshold
+   were frozen, and no hidden-test data was used for training, selection or thresholds. After
+   freezing, the hidden grants were scored once (`results/ardook_match_v1/hidden_test/`).
