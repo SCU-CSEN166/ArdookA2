@@ -210,47 +210,6 @@ The script uses CPU, performs no model downloads, and refuses to overwrite an ex
 | -------- | --------------------------- | -------- | ------------------------ |
 | [Change] | [Status]                    | [Result] | [Decision]               |
 
-### Trained Ardook grant-match classifier
-
-A trained, saved classifier that answers "is this grant a match for this applicant?" with a probability. Protocol, label mapping and success criteria were committed before training: [ardook_match_protocol.md](results/ardook_match_protocol.md). Full results: [report.json](results/ardook_match_v1/report.json).
-
-- **Data:** the clean synthetic database (200 fictional applicants × 150 fictional grants) and the 37 real grants in `Ardook_data.xlsx`. The messy synthetic data is never read (a test checks this); the unlabeled ranking-review pairs are not used.
-- **Target:** `match` vs `not_match`. Synthetic `match` → match; `unrelated`/`ineligible` → not_match. Real tracker Fit (a fit judgement written for Ardook, not verified eligibility): Excellent/Strong → match; Moderate/Weak–Moderate → not_match; the 9 conditional ratings ("Strong if India impact", "Excellent only if nonprofit", …) are ambiguous, never trained on or scored.
-- **Ardook profile (provisional, from this README):** "Ardook is an early-stage, woman-led U.S. startup building AI, physical-AI and data products with a social-impact mission." Facts: region US, woman-led yes. Entity type and revenue are unknown and left out.
-- **Inputs only:** applicant description + facts; grant Program, Type, Core Requirements, Amount / Benefit. Never Fit, Why It Fits, concerns, recommended action, deadlines, IDs or any label.
-- **Splits:** synthetic applicants grouped by description and grants by requirement text, seed 42, 60/20/20; cross-split pairs dropped (9,900 / 1,410 / 1,290 pairs kept; 17,400 dropped). Real: 28 labeled grants split by family (all Google programmes together) into 19 dev (training and 5-fold grouped cross-validation) and 9 held-out test grants. Synthetic grants share only short boilerplate phrases with real ones (highest TF-IDF similarity 0.30).
-- **Model:** P(match) = P(shared focus) × P(no requirement conflict), two logistic regressions on word-pair features (applicant word × grant word; applicant fact × requirement word) plus frozen BGE-large similarity features, trained on synthetic train + the 19 real dev grants (fixed 10% weight). Chosen from 22 candidates (TF-IDF, MiniLM/MPNet/BGE embeddings, gradient boosting, two-stage) on synthetic validation + real dev only; threshold 0.25.
-
-Scored once, after selection was frozen:
-
-| Data | Model | Macro-F1 | Match precision | Match recall | Confusion [[TN, FP], [FN, TP]] |
-| ---- | ----- | -------: | --------------: | -----------: | ------------------------------ |
-| Synthetic test (1,290 pairs, 88 match) | **Selected** | **0.873** | **0.71** | **0.83** | [[1172, 30], [15, 73]] |
-| | TF-IDF + logistic regression | 0.546 | 0.15 | 0.61 | [[906, 296], [34, 54]] |
-| | MiniLM-L6 + logistic regression | 0.579 | 0.22 | 0.22 | [[1133, 69], [69, 19]] |
-| | Always not_match | 0.482 | 0.00 | 0.00 | [[1202, 0], [88, 0]] |
-| Ardook held-out grants (9, 5 match) | **Selected** | **0.649** | **0.67** | **0.80** | [[2, 2], [1, 4]] |
-| | Keyword overlap | 0.500 | 1.00 | 0.20 | [[4, 0], [4, 1]] |
-| | Always match | 0.357 | 0.56 | 1.00 | [[0, 4], [0, 5]] |
-| Ardook dev grants, out-of-fold (19, 11 match) | **Selected** | 0.774 | 0.77 | 0.91 | [[5, 3], [1, 10]] |
-| Week 8 hidden test (10, TA labels, run once after freezing) | **Selected** | — | 1.00 | 0.60 | accuracy 0.80; 3 TP, 0 FP, 2 FN, 5 TN |
-
-On synthetic test, 27 of the 30 false matches are `ineligible` pairs (a requirement the generator checks with rules that are not always written in the text). The pre-registered success criteria were all met, but the real evidence is small: 9 held-out grants (6 correct) plus 10 hidden-test grants. This does not establish real-world accuracy. Before training, one audit command also printed the first two rows of the hidden-test labels; they were not used for training, selection or thresholds (see the protocol).
-
-Ardook held-out errors: **GTIA Grants** (requires a nonprofit; Ardook's entity type is unknown, so the model cannot rule it out) and **Credibly Small Business Award** (needs 6 months operating and revenue) were predicted matches; **Foundry3 Agentic AI Accelerator** (P = 0.23) was missed. Hidden-test misses: AWS Activate and Women Who Tech. Every grant's prediction is in [ardook_predictions.csv](results/ardook_match_v1/ardook_predictions.csv); dev grants show their out-of-fold score because the final model was trained on them.
-
-Reproduce (CPU, local model cache only; needs `BAAI/bge-large-en-v1.5`, `all-MiniLM-L6-v2` and `all-mpnet-base-v2` in the Hugging Face cache; about 25 minutes):
-
-```bash
-HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m src.train_match_classifier --output results/ardook_match_rerun
-HF_HUB_OFFLINE=1 .venv/bin/python -m src.predict_match --ardook                       # all 37 tracker grants
-HF_HUB_OFFLINE=1 .venv/bin/python -m src.predict_match --description "A U.S. nonprofit ..." \
-  --attributes '{"entity_type": "nonprofit", "region": "US"}' --grants grants.csv  # any applicant
-.venv/bin/python -m unittest discover -s tests
-```
-
-**Human labels that would help most:** Ardook's confirmed facts (entity type, revenue, ownership, incorporation); a match/not-match call on the 9 conditional Fit ratings; eligibility judgements (separate from Fit) for the 37 tracker grants; and completed reviews in the 160-pair ranking-review workbook so other applicants are represented.
-
 ### Individual contributions during that week
 
 | Member | Work completed  | Result (worked / partly / failed) | Evidence | Next step   |
