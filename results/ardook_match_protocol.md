@@ -87,4 +87,15 @@ Meeting these criteria would not establish real-world accuracy.
 
 ## Deviations
 
-(None yet.)
+1. **Two-stage candidate added before the frozen run (dev data only).** A smoke run of two
+   pre-registered candidates scored only about 0.65 synthetic-validation macro-F1. Diagnosis on
+   synthetic validation showed that "shared focus" is easy to learn from word pairs (relatedness
+   AUC 0.995) while frozen-encoder similarity barely separates it, and that requirement conflicts
+   are a separate problem (AUC about 0.93). So four `twostage:*` candidates were added:
+   P(match) = P(shared focus) x P(no requirement conflict | shared focus), each a logistic
+   regression on hashed word-pair features (applicant word x grant word; applicant fact x
+   requirement word), optionally with encoder similarities. The stage targets come from the
+   synthetic 3-way label; real Ardook grants count as shared-focus, and their binary target
+   trains the second stage. Regularization (C = 0.1 and 1.0) was chosen on synthetic validation.
+   No synthetic test pair or held-out real grant was used for this.
+2. The smoke run wrote its outputs to a scratch folder only; its numbers are not reported.
