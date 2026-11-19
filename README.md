@@ -80,6 +80,7 @@ make tracker DESCRIPTION="Ardook is an early-stage, woman-led U.S. startup build
 make recommend DESCRIPTION="Ardook is an early-stage, woman-led U.S. startup building AI, physical-AI and data products with a social-impact mission."
 python -m src.evaluate_safety
 ```
+- Optional LoRA fit judge (CUDA GPU required): train the adapter with `notebooks/deepseek_lora_evaluation.ipynb`, then run `make recommend-synthetic RANKER=lora` or add `--ranker lora` to `python -m src.recommend`.
 - **Model(s) and data actually used:**
   - Models: [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) turns grants and organization descriptions into embeddings, which are stored in ChromaDB. [FLAN-T5-small](https://huggingface.co/google/flan-t5-small) writes the short explanation for each recommendation and does not decide eligibility.
   - Data: the real Ardook grant tracker, a fake dataset of 150 grants and 200 organizations, and a messy copy of the fake data with blanks, typos and duplicates.

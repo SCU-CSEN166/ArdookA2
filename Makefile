@@ -1,6 +1,7 @@
 PYTHON ?= .venv/bin/python
 DESCRIPTION ?=
 ATTRIBUTES ?= {}
+RANKER ?= semantic
 # deepseek-extraction runs DeepSeek extraction + recommendations on an SCU Wave GPU over ssh.
 WAVE ?= gkakar@login01.wave.scu.edu
 WAVE_DIR ?= ardook-deepseek
@@ -13,6 +14,7 @@ help:
 	@echo "make synthetic           Evaluate rankings on generated data"
 	@echo "make recommend           Show real-tracker recommendations (requires DESCRIPTION)"
 	@echo "make recommend-synthetic Show recommendations for a sample generated profile"
+	@echo "Use RANKER=lora on recommend targets to use the optional CUDA LoRA fit judge"
 	@echo "make deepseek-extraction Show real-tracker recommendations with DeepSeek extraction on a Wave GPU (requires DESCRIPTION)"
 
 tracker:
@@ -22,10 +24,10 @@ synthetic:
 	$(PYTHON) -m src.evaluate_relevance --dataset synthetic
 
 recommend:
-	$(PYTHON) -m src.recommend --dataset real --description "$(DESCRIPTION)" --attributes '$(ATTRIBUTES)'
+	$(PYTHON) -m src.recommend --dataset real --description "$(DESCRIPTION)" --attributes '$(ATTRIBUTES)' --ranker $(RANKER)
 
 recommend-synthetic:
-	$(PYTHON) -m src.recommend --dataset synthetic --profile-id 1
+	$(PYTHON) -m src.recommend --dataset synthetic --profile-id 1 --ranker $(RANKER)
 
 deepseek-extraction: export DESCRIPTION := $(DESCRIPTION)
 deepseek-extraction: export ATTRIBUTES := $(ATTRIBUTES)

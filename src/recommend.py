@@ -69,6 +69,17 @@ def main() -> None:
         default=".cache/deepseek_grant_details.json",
         help="Local JSON cache path for validated DeepSeek extractions.",
     )
+    parser.add_argument(
+        "--ranker",
+        choices=("semantic", "lora"),
+        default="semantic",
+        help="semantic: default MiniLM pipeline. lora: Qwen embedding shortlist reordered by the LoRA fit judge (CUDA required).",
+    )
+    parser.add_argument(
+        "--lora-adapter",
+        default=".cache/lora/qwen2.5-7b-fit-judge-v1",
+        help="LoRA adapter directory for --ranker lora.",
+    )
     args = parser.parse_args()
 
     try:
@@ -81,6 +92,8 @@ def main() -> None:
         parser.error("--top-k must be positive")
     if not 0 <= args.min_similarity <= 1:
         parser.error("--min-similarity must be between 0 and 1")
+    if args.ranker == "lora" and (args.explain or args.deepseek_extract):
+        parser.error("--ranker lora cannot be combined with --explain or --deepseek-extract")
     if args.dataset == "synthetic":
         as_of = args.as_of or REFERENCE_DATE
         if args.profile_id is not None:
@@ -107,6 +120,14 @@ def main() -> None:
         grants = load_grants()
         checker = load_real_checker(grants)
         store = VectorStore()
+
+    if args.ranker == "lora":
+        from src.fit_judge import FitJudgeRanker
+
+        ranker = FitJudgeRanker(grants, checker, adapter_dir=args.lora_adapter)
+        results = ranker.recommend(profile, as_of=as_of, top_k=args.top_k)
+        print(json.dumps(results, indent=2, ensure_ascii=False))
+        return
 
     additional_chunks = None
     extracted_details = None
