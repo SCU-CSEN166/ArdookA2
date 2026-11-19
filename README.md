@@ -208,6 +208,12 @@ The script uses CPU, performs no model downloads, and refuses to overwrite an ex
 | [Change] | [Status]                    | [Result] | [Decision]               |
 | Frontend (`streamlit run app.py`) now scores with the saved match classifier (`results/ardook_match_v1/model.joblib`, threshold 0.25, offline encoder) | Yes | Same scores as `python -m src.predict_match --ardook` on both workbooks; `tests/test_app_predict.py` | Keep |
 
+**Running the frontend** (`streamlit run app.py`): the app works offline, so the BGE encoder it uses has to be on your computer first. pip doesn't download it. Run this once while you're online (about 1.2 GB), then start the app:
+  ```
+  python -c "from sentence_transformers import SentenceTransformer as S; S('BAAI/bge-large-en-v1.5')"
+  ```
+  If you skip this, the app shows an error saying it can't connect to huggingface.co.
+
 ### Individual contributions during that week
 
 | Member | Work completed  | Result (worked / partly / failed) | Evidence | Next step   |
