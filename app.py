@@ -2,7 +2,7 @@ import pandas as pd
 import streamlit as st
 
 from src.grant_parser import grant_from_text, parse_grant_file
-from src.pytorch_classifier import PytorchGrantClassifier, organization_text
+from src.pytorch_classifier import PairingGrantClassifier, organization_text
 from src.run_hidden_test import PROFILES
 
 DESCRIPTION, _, FACTS = PROFILES["ardook_data"]
@@ -12,8 +12,8 @@ st.set_page_config(page_title="Ardook", layout="centered")
 
 
 @st.cache_resource(show_spinner=False)
-def load_classifier() -> PytorchGrantClassifier:
-    return PytorchGrantClassifier()
+def load_classifier() -> PairingGrantClassifier:
+    return PairingGrantClassifier()
 
 
 mode = st.segmented_control("Input", ["Upload table", "Paste grant"], default="Upload table",

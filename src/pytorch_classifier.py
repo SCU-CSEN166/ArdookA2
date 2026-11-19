@@ -71,3 +71,34 @@ class PytorchGrantClassifier:
                 "probabilities": {label: float(p) for label, p in zip(LABELS, row)},
             })
         return results
+
+
+class PairingGrantClassifier:
+    """TF-IDF + PyTorch + pairing table. Loads the saved model; trains and saves it once if missing."""
+
+    def __init__(self, directory=None):
+        from src.train_pairing import DEFAULT_DIR, build
+
+        self.directory = directory or DEFAULT_DIR
+        if not (self.directory / "model.pt").exists():
+            build(self.directory)
+
+    def predict(self, organization: str, grants: list) -> list[dict]:
+        from scipy.special import softmax
+
+        from src.train_pytorch import score_rows
+
+        if not grants:
+            return []
+        rows = [{"profile_description": organization, "program": grant_text(g), "type": "",
+                 "core_requirements": "", "amount_benefit": ""} for g in grants]
+        results = []
+        for row in softmax(score_rows(self.directory, rows), axis=1):
+            name = LABELS[int(row.argmax())]  # same class order as ranking_classifier's labels
+            results.append({
+                "label": "Relevant" if name == "match" else "Not relevant",
+                "predicted_class": name, "reason": REASONS[name],
+                "match_probability": float(row[LABELS.index("match")]),
+                "probabilities": {label: float(p) for label, p in zip(LABELS, row)},
+            })
+        return results

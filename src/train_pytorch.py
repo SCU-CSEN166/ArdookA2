@@ -233,14 +233,18 @@ def load_model(directory):
     return model.eval(), features, np.array(checkpoint["class_offsets"])
 
 
-def predict_rows(directory, rows):
-    """Predicted class index per row (profile_description + grant fields), no retraining."""
+def score_rows(directory, rows):
+    """Offset-adjusted logits per row (profile_description + grant fields), no retraining."""
     model, features, offsets = load_model(directory)
     pairs = pair_texts(rows)
     x = np.hstack([features.transform(pairs).toarray(),
                    np.array([compat_features(*p) for p in pairs], dtype=float)]).astype(np.float32)
     with torch.no_grad():
-        return (model(torch.from_numpy(x)).numpy() + offsets).argmax(1)
+        return model(torch.from_numpy(x)).numpy() + offsets
+
+
+def predict_rows(directory, rows):
+    return score_rows(directory, rows).argmax(1)
 
 
 def main():
