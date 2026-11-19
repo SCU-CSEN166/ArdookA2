@@ -206,6 +206,7 @@ The script uses CPU, performs no model downloads, and refuses to overwrite an ex
 | Change   | Worked? (Yes / Partly / No) | Evidence | Keep, revise, or revert? |
 | -------- | --------------------------- | -------- | ------------------------ |
 | [Change] | [Status]                    | [Result] | [Decision]               |
+| Frontend (`streamlit run app.py`) now scores with the saved match classifier (`results/ardook_match_v1/model.joblib`, threshold 0.25, offline encoder) | Yes | Same scores as `python -m src.predict_match --ardook` on both workbooks; `tests/test_app_predict.py` | Keep |
 
 ### Individual contributions during that week
 
