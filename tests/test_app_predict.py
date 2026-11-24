@@ -3,6 +3,7 @@
 import contextlib
 import importlib.util
 import io
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -15,11 +16,12 @@ from src.app_predict import ModelUnavailable, load_model, predict, results_csv
 from src.grant_parser import grant_from_text, parse_grant_file
 from src.match_classifier import Encoder, MatchClassifier, TwoStageClassifier
 from src.paths import REPO_ROOT
-from src.predict_match import DEFAULT_MODEL, main as predict_main
+from src.predict_match import DEFAULT_CONFIG, DEFAULT_MODEL, main as predict_main
 from src.score_hidden_test import read_labels
 
 HIDDEN = REPO_ROOT / "Ardook_hidden_test_grants.xlsx"
 HAS_STREAMLIT = importlib.util.find_spec("streamlit") is not None
+THRESHOLD = json.loads(DEFAULT_CONFIG.read_text())["threshold"]
 
 
 def cli(*args: str) -> pd.DataFrame:
@@ -49,7 +51,7 @@ class SavedModelInFrontend(unittest.TestCase):
 
     def test_saved_model_and_threshold_are_used(self):
         self.assertIsInstance(self.model, TwoStageClassifier)
-        self.assertEqual(self.model.threshold, 0.25)
+        self.assertEqual(self.model.threshold, THRESHOLD)
 
     def test_csv_tsv_xlsx_uploads_match_cli(self):
         expected = cli("--grants", str(HIDDEN))
@@ -83,9 +85,9 @@ class SavedModelInFrontend(unittest.TestCase):
 
     def test_stored_threshold_not_argmax(self):
         result = self.upload(HIDDEN.read_bytes(), HIDDEN.name)
-        self.assertEqual(list(result.match), list(result.p_match >= 0.25))
-        between = result[(result.p_match >= 0.25) & (result.p_match < 0.5)]
-        self.assertFalse(between.empty, "need a 0.25-0.5 score to tell the threshold from argmax")
+        self.assertEqual(list(result.match), list(result.p_match >= THRESHOLD))
+        between = result[(result.p_match >= THRESHOLD) & (result.p_match < 0.5)]
+        self.assertFalse(between.empty, "need a score between the threshold and 0.5 to tell it from argmax")
         self.assertTrue(between.match.all())
 
     def test_download_csv_reflects_predictions(self):
@@ -97,7 +99,7 @@ class SavedModelInFrontend(unittest.TestCase):
         self.assertEqual(list(frame.grant_id.astype(str)), list(self.table["Grant ID"]))
         self.assertEqual(list(frame.p_match), list(result.p_match))
         self.assertEqual(list(frame.predicted), list(result.predicted))
-        self.assertTrue((frame.threshold == 0.25).all())
+        self.assertTrue((frame.threshold == THRESHOLD).all())
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "out.csv"
             path.write_text(csv, encoding="utf-8")

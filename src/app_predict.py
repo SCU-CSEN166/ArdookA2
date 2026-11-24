@@ -1,7 +1,7 @@
-"""Frontend adapter for the saved match classifier (results/ardook_match_v1/model.joblib).
+"""Frontend adapter for the configured match classifier (results/ardook_match_v2/inference_config.json).
 
-Loads the model once (no training, no downloads) and scores grants for the provisional Ardook
-profile with the same code path as `python -m src.predict_match --ardook`.
+Loads the model once (no training, no downloads) with the same frozen threshold and requirement
+filter as `python -m src.predict_match --ardook`, and scores grants for the provisional Ardook profile.
 """
 
 from __future__ import annotations
@@ -11,23 +11,22 @@ from pathlib import Path
 import pandas as pd
 
 from src.match_classifier import ARDOOK_PROFILE, MatchClassifier
-from src.predict_match import DEFAULT_MODEL, score
+from src.predict_match import DEFAULT_CONFIG, load_inference_model, score
 
 
 class ModelUnavailable(RuntimeError):
     """The saved model or its local sentence encoder cannot be loaded."""
 
 
-def load_model(path: Path = DEFAULT_MODEL) -> MatchClassifier:
-    """Load the saved classifier and its offline encoder; never trains or downloads."""
-    path = Path(path)
-    if not path.is_file():
-        raise ModelUnavailable(f"Saved model not found at {path}. Restore "
-                               "results/ardook_match_v1/model.joblib from the repository.")
+def load_model(path: Path | None = None, config: Path = DEFAULT_CONFIG) -> MatchClassifier:
+    """Load the configured classifier and its offline encoder; never trains or downloads."""
     try:
-        model = MatchClassifier.load(path)
+        model = load_inference_model(config, path)
+    except FileNotFoundError as error:
+        raise ModelUnavailable(f"Saved model not found at {error.filename or path}. Restore the "
+                               "saved model from the repository.") from error
     except Exception as error:  # unpickling errors vary by version mismatch
-        raise ModelUnavailable(f"Could not load the saved model at {path}: {error}") from error
+        raise ModelUnavailable(f"Could not load the saved model: {error}") from error
     encoder = getattr(model, "encoder", None)
     if encoder is not None:
         try:
@@ -47,15 +46,28 @@ def predict(model: MatchClassifier, grants: pd.DataFrame) -> pd.DataFrame:
     return result
 
 
+def reason(row: pd.Series, threshold: float) -> str:
+    """Why a row got its result: the model score first, then any failed stated requirement."""
+    text = f"Model score {row['p_match']:.4f} {'>=' if row['p_match'] >= threshold else '<'} threshold {threshold}"
+    if row.get("requirement_check") == "fail":
+        return f"{text}; not a match because a stated requirement is not met: {row['requirement_evidence']}"
+    if row["match"]:
+        return f"{text}; eligibility not verified"
+    return text
+
+
 def results_csv(predictions: pd.DataFrame, threshold: float) -> str:
     """CSV of the shown predictions; `label` keeps the Relevant/Not relevant scorer format."""
-    return pd.DataFrame({
+    frame = pd.DataFrame({
         "grant_id": predictions["grant_id"],
         "program": predictions["program"],
         "label": predictions["match"].map({True: "Relevant", False: "Not relevant"}),
         "predicted": predictions["predicted"],
         "p_match": predictions["p_match"],
         "threshold": threshold,
-        "reason": [f"Model score {p:.4f} {'>=' if m else '<'} threshold {threshold}"
-                   for p, m in zip(predictions["p_match"], predictions["match"])],
-    }).to_csv(index=False)
+        "reason": [reason(row, threshold) for _, row in predictions.iterrows()],
+    })
+    if "requirement_check" in predictions:
+        frame["model_prediction"] = predictions["model_prediction"]
+        frame["requirement_check"] = predictions["requirement_check"]
+    return frame.to_csv(index=False)

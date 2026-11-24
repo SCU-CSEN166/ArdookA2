@@ -12,8 +12,10 @@ def load_classifier():
     return load_model()
 
 
-def result_text(match: bool) -> str:
-    return "Match" if match else "Not a match"
+def result_text(row) -> str:
+    if row.get("requirement_check") == "fail":
+        return "Not a match (requirement)"
+    return "Match" if row["match"] else "Not a match"
 
 
 mode = st.segmented_control("Input", ["Upload table", "Paste grant"], default="Upload table",
@@ -52,17 +54,19 @@ if grants is not None:
 
     if mode == "Paste grant":
         result = predictions.iloc[0]
-        st.subheader(result_text(result["match"]))
+        st.subheader(result_text(result))
         st.caption(f"Model score {result['p_match']:.2f} · match at {model.threshold:.2f} or above")
+        if result.get("requirement_check") == "fail":
+            st.caption(f"Stated requirement not met: {result['requirement_evidence']}")
     else:
         table = pd.DataFrame({
             "Grant": predictions["program"],
-            "Result": predictions["match"].map(result_text),
+            "Result": [result_text(row) for _, row in predictions.iterrows()],
             "Score": predictions["p_match"].map("{:.2f}".format),
         })
         st.table(table, hide_index=True, border="horizontal", alt="Grant results")
         st.caption(f"Model score from the saved match classifier · match at "
-                   f"{model.threshold:.2f} or above")
+                   f"{model.threshold:.2f} or above unless a stated requirement rules it out")
         st.download_button("Download CSV", results_csv(predictions, model.threshold),
                            file_name="hidden_test_outputs.csv", mime="text/csv",
                            type="tertiary", icon=":material/download:")
