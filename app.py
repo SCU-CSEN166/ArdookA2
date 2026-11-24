@@ -66,7 +66,9 @@ if grants is not None:
         })
         st.table(table, hide_index=True, border="horizontal", alt="Grant results")
         st.caption(f"Model score from the saved match classifier · match at "
-                   f"{model.threshold:.2f} or above unless a stated requirement rules it out")
+                   f"{model.threshold:.2f} or above"
+                   + (" unless a stated requirement rules it out"
+                      if getattr(model, "requirement_filter", False) else ""))
         st.download_button("Download CSV", results_csv(predictions, model.threshold),
                            file_name="hidden_test_outputs.csv", mime="text/csv",
                            type="tertiary", icon=":material/download:")
