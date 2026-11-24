@@ -1,0 +1,11 @@
+grant_id,program,ta_label,p_match,model_prediction,filter,filter_fail_evidence,final_prediction
+1,Cisco Global Problem Solver Challenge 2027,match,0.9046,match,none,,match
+2,Women's Fund Armenia - Small Grants for Women-Led Initiatives in Aragatsotn,not_match,0.0106,not_match,fail,"region: ""Women and women-led groups based in Aragatsotn Province (Ashtarak area), Armenia, only""",not_match
+3,Tory Burch Foundation Fellows Program,not_match,0.0298,not_match,unknown,,not_match
+4,AWS Activate (Founders tier),match,0.0412,not_match,unknown,,not_match
+5,Women Founders Network Fast Pitch 2027,match,0.3674,match,unknown,,match
+6,IOM ELEVATE Business Grants,not_match,0.0151,not_match,fail,"region: ""SMEs in listed communities of Tavush, Lori, Shirak and Gegharkunik provinces, Armenia, that hire vulnerable groups""",not_match
+7,TiE Women Global Pitch Competition 2026,match,0.7763,match,unknown,,match
+8,D-Prize Global Competition,not_match,0.0964,not_match,unknown,,not_match
+9,People in Need - Grant Call for Armenian Civil Society Organisations,not_match,0.0081,not_match,fail,"region: ""CSOs registered in Armenia for 6 months to 5 years, working outside Yerevan on human rights and civic topics""",not_match
+10,Women Who Tech - Tech Startup Grant,match,0.2218,match,pass,,match

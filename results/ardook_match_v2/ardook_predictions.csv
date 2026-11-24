@@ -1,0 +1,38 @@
+source_row,program,tracker_fit,target,role,p_match,model_prediction,filter,filter_fail_evidence,filter_if_for_profit,final_prediction
+2,Women TechEU 2026–2028,Excellent,match,dev (out-of-fold score),0.1727,match,fail,"region: ""eligible Horizon Europe country incl. Armenia""",fail,match
+3,Tara’s Circle 2026,Excellent,match,held-out test (post-exposure),0.3755,match,pass,,pass,match
+4,Her Agenda Breakthrough Grant,Strong,match,dev (out-of-fold score),0.703,match,pass,,pass,match
+5,Hey Helen Grant (Visionaries),Strong,match,dev (out-of-fold score),0.2261,match,unknown,,unknown,match
+6,WomensNet Amber Grant / Startup Grant,Strong,match,dev (out-of-fold score),0.7633,match,unknown,,unknown,match
+7,She Believed She Could – Iconic Impact / Emerging Founder Grant,Strong,match,dev (out-of-fold score),0.6787,match,pass,,pass,match
+8,Credibly Small Business Award,Moderate,not_match,held-out test (post-exposure),0.3064,match,unknown,,unknown,match
+9,Giving Joy Grant,Moderate,not_match,dev (out-of-fold score),0.3773,match,pass,,pass,match
+10,GTIA Grants,Moderate,not_match,held-out test (post-exposure),0.6566,match,unknown,,fail,match
+11,EchoHer Founder Fellowship,Excellent,match,dev (out-of-fold score),0.3869,match,pass,,pass,match
+12,100x Impact Accelerator 2027/28,Strong,match,dev (out-of-fold score),0.6229,match,unknown,,pass,match
+13,NSF America’s Seed Fund (SBIR/STTR Phase I),Strong if novel R&D; otherwise Moderate,ambiguous (not scored),conditional (not scored),0.5953,match,none,,none,match
+14,America250 Community Futures Challenge,Moderate,not_match,dev (out-of-fold score),0.0353,not_match,unknown,,fail,not_match
+15,Oasis Collective × AI After 5 – Women in AI Pitch Competition (SF),Excellent,match,held-out test (post-exposure),0.7915,match,pass,,pass,match
+16,Accelerate California Innovation Grants,Strong,match,dev (out-of-fold score),0.7081,match,none,,none,match
+17,NVIDIA Inception,Strong,match,dev (out-of-fold score),0.7287,match,none,,none,match
+18,UNICEF Venture Fund,Moderate,not_match,dev (out-of-fold score),0.9676,match,none,,none,match
+19,AI for Good Innovation Factory,Moderate,not_match,held-out test (post-exposure),0.1145,not_match,none,,none,not_match
+20,Google for Startups Accelerator: United States,Strong,match,dev (out-of-fold score),0.4634,match,none,,none,match
+21,Google for Startups Women Founders Fund,Excellent if a matching round opens,ambiguous (not scored),conditional (not scored),0.976,match,pass,,pass,match
+22,Google.org GenAI / AI Social Impact Accelerator,Excellent if matching call opens,ambiguous (not scored),conditional (not scored),0.4235,match,none,,none,match
+23,Google.org Impact Challenge – AI for Government Innovation,Moderate–Strong thematically,ambiguous (not scored),conditional (not scored),0.0634,not_match,unknown,,unknown,not_match
+24,Google.org Impact Challenge – AI for Science,Moderate,not_match,dev (out-of-fold score),0.8902,match,unknown,,unknown,match
+25,Fast Forward Accelerator 2027,Excellent only if nonprofit,ambiguous (not scored),conditional (not scored),0.9241,match,unknown,,fail,match
+26,Tata Social Enterprise Challenge 2026,Strong if India impact,ambiguous (not scored),conditional (not scored),0.0935,not_match,none,,none,not_match
+27,Foundry3 Agentic AI Accelerator,Strong,match,held-out test (post-exposure),0.2509,match,pass,,pass,match
+28,Twilio AI Startup Searchlight 2026,Moderate,not_match,dev (out-of-fold score),0.1251,not_match,none,,none,not_match
+29,DivInc Women in Tech Accelerator,Strong thematic fit; low practical fit,ambiguous (not scored),conditional (not scored),0.6598,match,pass,,pass,match
+30,Rural AI Catalyst Fund,Weak–Moderate,not_match,dev (out-of-fold score),0.1054,not_match,unknown,,unknown,not_match
+31,AI Civic Action Accelerator,Moderate,not_match,dev (out-of-fold score),0.1289,not_match,pass,,pass,not_match
+32,Cartier Women’s Initiative – Science & Technology Pioneer Award,Strong if deep-tech criteria met,ambiguous (not scored),conditional (not scored),0.4974,match,pass,,pass,match
+33,Llama Impact Grants,Strong,match,held-out test (post-exposure),0.9393,match,none,,none,match
+34,Humanity AI funding/program,Moderate,not_match,dev (out-of-fold score),0.0028,not_match,none,,none,not_match
+35,NetHope AI Accelerator,Strong,match,dev (out-of-fold score),0.6364,match,none,,none,match
+36,Mozilla Responsible Computing Challenge 2026,Moderate,not_match,held-out test (post-exposure),0.0178,not_match,none,,none,not_match
+37,Hello Alice + Google Main Street Rising AI Pitch,Moderate–Strong,ambiguous (not scored),conditional (not scored),0.8657,match,none,,none,match
+38,High Five Grant for Moms,Strong,match,held-out test (post-exposure),0.6792,match,unknown,,unknown,match
