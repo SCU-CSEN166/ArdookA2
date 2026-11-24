@@ -86,4 +86,11 @@ optimistic because 27 configurations and a threshold were chosen on 19 grants.
 
 ## Deviations
 
-(none yet)
+1. Before the full run, the script was smoke-tested with one or two grid configurations into a
+   scratch folder to check it ran end to end; those numbers were not used or kept.
+2. Retraining the v1 configuration does not reproduce the saved v1 model bit for bit (largest
+   P(match) difference 0.024 on the tracker; Tara's Circle falls below 0.25 in the retrain). The
+   promotion rule compared against the retrain, as declared; the saved v1 model is reported too.
+3. The requirement filter failed its integration check (it flips Women TechEU, correct under the
+   promoted model, to `not_match`), so the v2 config keeps it off. The CLI exposes it only as an
+   explicit opt-in (`--requirement-filter`); the app does not use it.
