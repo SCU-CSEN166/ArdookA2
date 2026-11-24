@@ -249,12 +249,12 @@ The script uses CPU, performs no model downloads, and refuses to overwrite an ex
 
 ### Responsible AI assessment
 
-- **Potential harms or affected users:** [Who could be affected and how?]
-- **Privacy and data handling:** [How sensitive information is protected]
-- **Reliability and unsupported claims:** [How outputs are verified or uncertainty is communicated]
-- **Fairness, accessibility, and usability:** [Relevant concerns and tests]
-- **Human oversight:** [Where a human should review or correct outputs]
-- **Remaining limitations:** [What should not be trusted or deployed yet]
+- **Potential harms or affected users:** The people affected are small nonprofits like Ardook. If we say a grant is a fit when it isn't, they could waste days on an application they can't win. If we miss a good grant, they never find out about it.
+- **Privacy and data handling:** We only use the nonprofit's profile and public grant listings, so there's no personal info about people. The app uses a Hugging Face model (BAAI/bge-large-en-v1.5) that you download once, and after that it runs on your own computer, so the grants you upload are never sent anywhere.
+- **Reliability and unsupported claims:** Our scores on fake data are too good (97.6%) because the fake labels follow the same rules the model learned. On the 10 real hidden grants the best model only got F1 0.83. The app only gives Relevant / Not relevant, and doesn't tell you how sure it is. The written explanations can say things that aren't in the grant, so they need to be checked.
+- **Fairness, accessibility, and usability:** The model only looks at organization type, region and woman-led, so it may do worse for groups it hasn't seen much. We tested it with other groups too, but we only added Armenia as a region ourselves, so we can't promise it works as well for every region. The app is simple (upload a file or paste a grant), but we haven't tested it with screen readers.
+- **Human oversight:** A person should always check the official grant page before applying, especially the deadline, revenue limits and who can apply. Treat our results as a shortlist to look at, not the final answer.
+- **Remaining limitations:** Don't use this as someone's only way of finding grants. We tested on the real tracker data too, but we still don't have a lot of real grants, so a few mistakes can change the scores a lot. It misses minimum-revenue rules, doesn't check what kind of project a grant pays for (D-Prize), and one model's cutoff is too strict and misses good grants.
 
 ### Final improvements and outcomes
 
