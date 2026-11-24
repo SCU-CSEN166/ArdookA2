@@ -1,0 +1,7 @@
+{
+  "model": "results/ardook_match_v2/model.joblib",
+  "threshold": 0.15,
+  "filter": null,
+  "selected_by": "results/ardook_match_v2_protocol.md",
+  "report": "results/ardook_match_v2/report.json"
+}

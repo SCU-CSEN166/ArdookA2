@@ -1,0 +1,1551 @@
+{
+  "created_at": "2026-11-24T06:40:15.101158+00:00",
+  "protocol": "results/ardook_match_v2_protocol.md",
+  "data_sha256": {
+    "clean_synthetic_db": "5f026137937c875711b97e33474543ec62dbda35bbfc10435ab5ac1de115238a",
+    "ardook_workbook": "4c80de295d885beb60c74acab4f2460406430914c5771a8ade21fa109fd2b992",
+    "hidden_workbook": "7a2ab4895e2f7ac814fd9a364c855b9d68bbf5671f95112238a7b1f79cee1594",
+    "hidden_labels": "3b8348078799298e59a98cc1fc18ea2b6e78e94b3a39b5f4b0664896ed9bdfd8"
+  },
+  "code_sha256": {
+    "src/match_classifier.py": "7c226415a296959d1fa2d8d9a31ae8efc9d8253d3af0752356c4ad65d9077b9b",
+    "src/tune_match_classifier.py": "33a6d34537ae3a5d306b03f7d0dff2927dee9d5870bf3f15299d9a2a813775c7",
+    "src/eligibility_filter.py": "b4b2fd26992bbddc69355570d0e2493e7ddbc3b676029ba64dcfdf2ead4ffc73"
+  },
+  "versions": {
+    "torch": "2.15.0",
+    "scikit-learn": "1.9.1",
+    "sentence-transformers": "3.4.1",
+    "numpy": "2.5.4",
+    "pandas": "2.2.3"
+  },
+  "splits": "results/ardook_match_v1/split_manifest.json (asserted equal)",
+  "ardook_profile": {
+    "description": "Ardook is an early-stage, woman-led U.S. startup building AI, physical-AI and data products with a social-impact mission.",
+    "attributes": {
+      "region": "US",
+      "woman_led": "yes"
+    }
+  },
+  "filter_version": "requirement-filter-1",
+  "decision": {
+    "model": "grid best: related_C=0.1 conflict_C=1.0 real_share=0.05",
+    "model_promoted": true,
+    "model_promotion_failed_checks": [],
+    "filter_integrated": false,
+    "filter_checks": {
+      "real-dev macro-F1 not lower": false,
+      "no correct real-dev prediction flipped": false,
+      "synthetic-validation macro-F1 higher": true
+    },
+    "threshold": 0.15
+  },
+  "inference_config": {
+    "model": "results/ardook_match_v2/model.joblib",
+    "threshold": 0.15,
+    "filter": null,
+    "selected_by": "results/ardook_match_v2_protocol.md",
+    "report": "results/ardook_match_v2/report.json"
+  },
+  "candidates": [
+    {
+      "name": "v1 saved model",
+      "threshold": 0.25,
+      "synthetic_validation": {
+        "n": 1410,
+        "class_counts": {
+          "not_match": 1368,
+          "match": 42
+        },
+        "accuracy": 0.9680851063829787,
+        "macro_f1": 0.7445024744401805,
+        "match_precision": 0.46938775510204084,
+        "match_recall": 0.5476190476190477,
+        "match_f1": 0.5054945054945055,
+        "confusion_matrix": {
+          "rows_truth_cols_predicted": [
+            "not_match",
+            "match"
+          ],
+          "matrix": [
+            [
+              1342,
+              26
+            ],
+            [
+              19,
+              23
+            ]
+          ]
+        },
+        "predicted_match_by_original_label": {
+          "match": 23,
+          "unrelated": 15,
+          "ineligible": 11
+        },
+        "original_label_counts": {
+          "unrelated": 1237,
+          "ineligible": 131,
+          "match": 42
+        }
+      },
+      "real_dev": {
+        "n": 19,
+        "class_counts": {
+          "match": 11,
+          "not_match": 8
+        },
+        "accuracy": 0.7894736842105263,
+        "macro_f1": 0.7738095238095238,
+        "match_precision": 0.7692307692307693,
+        "match_recall": 0.9090909090909091,
+        "match_f1": 0.8333333333333334,
+        "confusion_matrix": {
+          "rows_truth_cols_predicted": [
+            "not_match",
+            "match"
+          ],
+          "matrix": [
+            [
+              5,
+              3
+            ],
+            [
+              1,
+              10
+            ]
+          ]
+        },
+        "false_positives": [
+          "Giving Joy Grant",
+          "UNICEF Venture Fund",
+          "Google.org Impact Challenge \u2013 AI for Science"
+        ],
+        "false_negatives": [
+          "Women TechEU 2026\u20132028"
+        ]
+      },
+      "selection_score": 0.7591559991248522,
+      "after_selection": {
+        "synthetic_test": {
+          "n": 1290,
+          "class_counts": {
+            "not_match": 1202,
+            "match": 88
+          },
+          "accuracy": 0.9651162790697675,
+          "macro_f1": 0.8727807862826786,
+          "match_precision": 0.7087378640776699,
+          "match_recall": 0.8295454545454546,
+          "match_f1": 0.7643979057591623,
+          "confusion_matrix": {
+            "rows_truth_cols_predicted": [
+              "not_match",
+              "match"
+            ],
+            "matrix": [
+              [
+                1172,
+                30
+              ],
+              [
+                15,
+                73
+              ]
+            ]
+          },
+          "predicted_match_by_original_label": {
+            "match": 73,
+            "ineligible": 27,
+            "unrelated": 3
+          },
+          "original_label_counts": {
+            "unrelated": 1083,
+            "match": 88,
+            "ineligible": 119
+          }
+        },
+        "real_test": {
+          "n": 9,
+          "class_counts": {
+            "match": 5,
+            "not_match": 4
+          },
+          "accuracy": 0.6666666666666666,
+          "macro_f1": 0.6493506493506493,
+          "match_precision": 0.6666666666666666,
+          "match_recall": 0.8,
+          "match_f1": 0.7272727272727273,
+          "confusion_matrix": {
+            "rows_truth_cols_predicted": [
+              "not_match",
+              "match"
+            ],
+            "matrix": [
+              [
+                2,
+                2
+              ],
+              [
+                1,
+                4
+              ]
+            ]
+          },
+          "false_positives": [
+            "Credibly Small Business Award",
+            "GTIA Grants"
+          ],
+          "false_negatives": [
+            "Foundry3 Agentic AI Accelerator"
+          ]
+        },
+        "hidden_post_exposure": {
+          "n": 10,
+          "class_counts": {
+            "match": 5,
+            "not_match": 5
+          },
+          "accuracy": 0.8,
+          "macro_f1": 0.7916666666666667,
+          "match_precision": 1.0,
+          "match_recall": 0.6,
+          "match_f1": 0.75,
+          "confusion_matrix": {
+            "rows_truth_cols_predicted": [
+              "not_match",
+              "match"
+            ],
+            "matrix": [
+              [
+                5,
+                0
+              ],
+              [
+                2,
+                3
+              ]
+            ]
+          },
+          "false_positives": [],
+          "false_negatives": [
+            "AWS Activate (Founders tier)",
+            "Women Who Tech - Tech Startup Grant"
+          ]
+        }
+      }
+    },
+    {
+      "name": "v1 saved model + filter",
+      "threshold": 0.25,
+      "synthetic_validation": {
+        "n": 1410,
+        "class_counts": {
+          "not_match": 1368,
+          "match": 42
+        },
+        "accuracy": 0.975177304964539,
+        "macro_f1": 0.7663473966791502,
+        "match_precision": 0.6,
+        "match_recall": 0.5,
+        "match_f1": 0.5454545454545454,
+        "confusion_matrix": {
+          "rows_truth_cols_predicted": [
+            "not_match",
+            "match"
+          ],
+          "matrix": [
+            [
+              1354,
+              14
+            ],
+            [
+              21,
+              21
+            ]
+          ]
+        },
+        "predicted_match_by_original_label": {
+          "match": 21,
+          "unrelated": 14
+        },
+        "original_label_counts": {
+          "unrelated": 1237,
+          "ineligible": 131,
+          "match": 42
+        },
+        "filter_coverage": {
+          "fail": 1118,
+          "pass": 164,
+          "none": 47,
+          "unknown": 81
+        },
+        "filter_flipped_to_not_match": 14
+      },
+      "real_dev": {
+        "n": 19,
+        "class_counts": {
+          "match": 11,
+          "not_match": 8
+        },
+        "accuracy": 0.7894736842105263,
+        "macro_f1": 0.7738095238095238,
+        "match_precision": 0.7692307692307693,
+        "match_recall": 0.9090909090909091,
+        "match_f1": 0.8333333333333334,
+        "confusion_matrix": {
+          "rows_truth_cols_predicted": [
+            "not_match",
+            "match"
+          ],
+          "matrix": [
+            [
+              5,
+              3
+            ],
+            [
+              1,
+              10
+            ]
+          ]
+        },
+        "false_positives": [
+          "Giving Joy Grant",
+          "UNICEF Venture Fund",
+          "Google.org Impact Challenge \u2013 AI for Science"
+        ],
+        "false_negatives": [
+          "Women TechEU 2026\u20132028"
+        ],
+        "filter_coverage": {
+          "fail": 1,
+          "pass": 5,
+          "unknown": 6,
+          "none": 7
+        },
+        "filter_flipped_to_not_match": 0
+      },
+      "selection_score": 0.770078460244337,
+      "after_selection": {
+        "synthetic_test": {
+          "n": 1290,
+          "class_counts": {
+            "not_match": 1202,
+            "match": 88
+          },
+          "accuracy": 0.975968992248062,
+          "macro_f1": 0.8909697665351615,
+          "match_precision": 0.9523809523809523,
+          "match_recall": 0.6818181818181818,
+          "match_f1": 0.7947019867549668,
+          "confusion_matrix": {
+            "rows_truth_cols_predicted": [
+              "not_match",
+              "match"
+            ],
+            "matrix": [
+              [
+                1199,
+                3
+              ],
+              [
+                28,
+                60
+              ]
+            ]
+          },
+          "predicted_match_by_original_label": {
+            "match": 60,
+            "unrelated": 3
+          },
+          "original_label_counts": {
+            "unrelated": 1083,
+            "match": 88,
+            "ineligible": 119
+          },
+          "filter_coverage": {
+            "fail": 904,
+            "unknown": 161,
+            "pass": 225
+          },
+          "filter_flipped_to_not_match": 40
+        },
+        "real_test": {
+          "n": 9,
+          "class_counts": {
+            "match": 5,
+            "not_match": 4
+          },
+          "accuracy": 0.6666666666666666,
+          "macro_f1": 0.6493506493506493,
+          "match_precision": 0.6666666666666666,
+          "match_recall": 0.8,
+          "match_f1": 0.7272727272727273,
+          "confusion_matrix": {
+            "rows_truth_cols_predicted": [
+              "not_match",
+              "match"
+            ],
+            "matrix": [
+              [
+                2,
+                2
+              ],
+              [
+                1,
+                4
+              ]
+            ]
+          },
+          "false_positives": [
+            "Credibly Small Business Award",
+            "GTIA Grants"
+          ],
+          "false_negatives": [
+            "Foundry3 Agentic AI Accelerator"
+          ],
+          "filter_coverage": {
+            "pass": 3,
+            "unknown": 3,
+            "none": 3
+          },
+          "filter_flipped_to_not_match": 0
+        },
+        "hidden_post_exposure": {
+          "n": 10,
+          "class_counts": {
+            "match": 5,
+            "not_match": 5
+          },
+          "accuracy": 0.8,
+          "macro_f1": 0.7916666666666667,
+          "match_precision": 1.0,
+          "match_recall": 0.6,
+          "match_f1": 0.75,
+          "confusion_matrix": {
+            "rows_truth_cols_predicted": [
+              "not_match",
+              "match"
+            ],
+            "matrix": [
+              [
+                5,
+                0
+              ],
+              [
+                2,
+                3
+              ]
+            ]
+          },
+          "false_positives": [],
+          "false_negatives": [
+            "AWS Activate (Founders tier)",
+            "Women Who Tech - Tech Startup Grant"
+          ],
+          "filter_coverage": {
+            "none": 1,
+            "fail": 3,
+            "unknown": 5,
+            "pass": 1
+          },
+          "filter_flipped_to_not_match": 0
+        }
+      }
+    },
+    {
+      "name": "v1 config retrained",
+      "threshold": 0.25,
+      "synthetic_validation": {
+        "n": 1410,
+        "class_counts": {
+          "not_match": 1368,
+          "match": 42
+        },
+        "accuracy": 0.9673758865248226,
+        "macro_f1": 0.736019536019536,
+        "match_precision": 0.4583333333333333,
+        "match_recall": 0.5238095238095238,
+        "match_f1": 0.4888888888888889,
+        "confusion_matrix": {
+          "rows_truth_cols_predicted": [
+            "not_match",
+            "match"
+          ],
+          "matrix": [
+            [
+              1342,
+              26
+            ],
+            [
+              20,
+              22
+            ]
+          ]
+        },
+        "predicted_match_by_original_label": {
+          "match": 22,
+          "unrelated": 15,
+          "ineligible": 11
+        },
+        "original_label_counts": {
+          "unrelated": 1237,
+          "ineligible": 131,
+          "match": 42
+        }
+      },
+      "real_dev": {
+        "n": 19,
+        "class_counts": {
+          "match": 11,
+          "not_match": 8
+        },
+        "accuracy": 0.7894736842105263,
+        "macro_f1": 0.7738095238095238,
+        "match_precision": 0.7692307692307693,
+        "match_recall": 0.9090909090909091,
+        "match_f1": 0.8333333333333334,
+        "confusion_matrix": {
+          "rows_truth_cols_predicted": [
+            "not_match",
+            "match"
+          ],
+          "matrix": [
+            [
+              5,
+              3
+            ],
+            [
+              1,
+              10
+            ]
+          ]
+        },
+        "false_positives": [
+          "Giving Joy Grant",
+          "UNICEF Venture Fund",
+          "Google.org Impact Challenge \u2013 AI for Science"
+        ],
+        "false_negatives": [
+          "Women TechEU 2026\u20132028"
+        ]
+      },
+      "selection_score": 0.7549145299145299,
+      "after_selection": {
+        "synthetic_test": {
+          "n": 1290,
+          "class_counts": {
+            "not_match": 1202,
+            "match": 88
+          },
+          "accuracy": 0.9651162790697675,
+          "macro_f1": 0.8727807862826786,
+          "match_precision": 0.7087378640776699,
+          "match_recall": 0.8295454545454546,
+          "match_f1": 0.7643979057591623,
+          "confusion_matrix": {
+            "rows_truth_cols_predicted": [
+              "not_match",
+              "match"
+            ],
+            "matrix": [
+              [
+                1172,
+                30
+              ],
+              [
+                15,
+                73
+              ]
+            ]
+          },
+          "predicted_match_by_original_label": {
+            "match": 73,
+            "ineligible": 27,
+            "unrelated": 3
+          },
+          "original_label_counts": {
+            "unrelated": 1083,
+            "match": 88,
+            "ineligible": 119
+          }
+        },
+        "real_test": {
+          "n": 9,
+          "class_counts": {
+            "match": 5,
+            "not_match": 4
+          },
+          "accuracy": 0.5555555555555556,
+          "macro_f1": 0.55,
+          "match_precision": 0.6,
+          "match_recall": 0.6,
+          "match_f1": 0.6,
+          "confusion_matrix": {
+            "rows_truth_cols_predicted": [
+              "not_match",
+              "match"
+            ],
+            "matrix": [
+              [
+                2,
+                2
+              ],
+              [
+                2,
+                3
+              ]
+            ]
+          },
+          "false_positives": [
+            "Credibly Small Business Award",
+            "GTIA Grants"
+          ],
+          "false_negatives": [
+            "Tara\u2019s Circle 2026",
+            "Foundry3 Agentic AI Accelerator"
+          ]
+        },
+        "hidden_post_exposure": {
+          "n": 10,
+          "class_counts": {
+            "match": 5,
+            "not_match": 5
+          },
+          "accuracy": 0.8,
+          "macro_f1": 0.7916666666666667,
+          "match_precision": 1.0,
+          "match_recall": 0.6,
+          "match_f1": 0.75,
+          "confusion_matrix": {
+            "rows_truth_cols_predicted": [
+              "not_match",
+              "match"
+            ],
+            "matrix": [
+              [
+                5,
+                0
+              ],
+              [
+                2,
+                3
+              ]
+            ]
+          },
+          "false_positives": [],
+          "false_negatives": [
+            "AWS Activate (Founders tier)",
+            "Women Who Tech - Tech Startup Grant"
+          ]
+        }
+      }
+    },
+    {
+      "name": "v1 config retrained + filter",
+      "threshold": 0.25,
+      "synthetic_validation": {
+        "n": 1410,
+        "class_counts": {
+          "not_match": 1368,
+          "match": 42
+        },
+        "accuracy": 0.9744680851063829,
+        "macro_f1": 0.7565981279729936,
+        "match_precision": 0.5882352941176471,
+        "match_recall": 0.47619047619047616,
+        "match_f1": 0.5263157894736842,
+        "confusion_matrix": {
+          "rows_truth_cols_predicted": [
+            "not_match",
+            "match"
+          ],
+          "matrix": [
+            [
+              1354,
+              14
+            ],
+            [
+              22,
+              20
+            ]
+          ]
+        },
+        "predicted_match_by_original_label": {
+          "match": 20,
+          "unrelated": 14
+        },
+        "original_label_counts": {
+          "unrelated": 1237,
+          "ineligible": 131,
+          "match": 42
+        },
+        "filter_coverage": {
+          "fail": 1118,
+          "pass": 164,
+          "none": 47,
+          "unknown": 81
+        },
+        "filter_flipped_to_not_match": 14
+      },
+      "real_dev": {
+        "n": 19,
+        "class_counts": {
+          "match": 11,
+          "not_match": 8
+        },
+        "accuracy": 0.7894736842105263,
+        "macro_f1": 0.7738095238095238,
+        "match_precision": 0.7692307692307693,
+        "match_recall": 0.9090909090909091,
+        "match_f1": 0.8333333333333334,
+        "confusion_matrix": {
+          "rows_truth_cols_predicted": [
+            "not_match",
+            "match"
+          ],
+          "matrix": [
+            [
+              5,
+              3
+            ],
+            [
+              1,
+              10
+            ]
+          ]
+        },
+        "false_positives": [
+          "Giving Joy Grant",
+          "UNICEF Venture Fund",
+          "Google.org Impact Challenge \u2013 AI for Science"
+        ],
+        "false_negatives": [
+          "Women TechEU 2026\u20132028"
+        ],
+        "filter_coverage": {
+          "fail": 1,
+          "pass": 5,
+          "unknown": 6,
+          "none": 7
+        },
+        "filter_flipped_to_not_match": 0
+      },
+      "selection_score": 0.7652038258912588,
+      "after_selection": {
+        "synthetic_test": {
+          "n": 1290,
+          "class_counts": {
+            "not_match": 1202,
+            "match": 88
+          },
+          "accuracy": 0.975968992248062,
+          "macro_f1": 0.8909697665351615,
+          "match_precision": 0.9523809523809523,
+          "match_recall": 0.6818181818181818,
+          "match_f1": 0.7947019867549668,
+          "confusion_matrix": {
+            "rows_truth_cols_predicted": [
+              "not_match",
+              "match"
+            ],
+            "matrix": [
+              [
+                1199,
+                3
+              ],
+              [
+                28,
+                60
+              ]
+            ]
+          },
+          "predicted_match_by_original_label": {
+            "match": 60,
+            "unrelated": 3
+          },
+          "original_label_counts": {
+            "unrelated": 1083,
+            "match": 88,
+            "ineligible": 119
+          },
+          "filter_coverage": {
+            "fail": 904,
+            "unknown": 161,
+            "pass": 225
+          },
+          "filter_flipped_to_not_match": 40
+        },
+        "real_test": {
+          "n": 9,
+          "class_counts": {
+            "match": 5,
+            "not_match": 4
+          },
+          "accuracy": 0.5555555555555556,
+          "macro_f1": 0.55,
+          "match_precision": 0.6,
+          "match_recall": 0.6,
+          "match_f1": 0.6,
+          "confusion_matrix": {
+            "rows_truth_cols_predicted": [
+              "not_match",
+              "match"
+            ],
+            "matrix": [
+              [
+                2,
+                2
+              ],
+              [
+                2,
+                3
+              ]
+            ]
+          },
+          "false_positives": [
+            "Credibly Small Business Award",
+            "GTIA Grants"
+          ],
+          "false_negatives": [
+            "Tara\u2019s Circle 2026",
+            "Foundry3 Agentic AI Accelerator"
+          ],
+          "filter_coverage": {
+            "pass": 3,
+            "unknown": 3,
+            "none": 3
+          },
+          "filter_flipped_to_not_match": 0
+        },
+        "hidden_post_exposure": {
+          "n": 10,
+          "class_counts": {
+            "match": 5,
+            "not_match": 5
+          },
+          "accuracy": 0.8,
+          "macro_f1": 0.7916666666666667,
+          "match_precision": 1.0,
+          "match_recall": 0.6,
+          "match_f1": 0.75,
+          "confusion_matrix": {
+            "rows_truth_cols_predicted": [
+              "not_match",
+              "match"
+            ],
+            "matrix": [
+              [
+                5,
+                0
+              ],
+              [
+                2,
+                3
+              ]
+            ]
+          },
+          "false_positives": [],
+          "false_negatives": [
+            "AWS Activate (Founders tier)",
+            "Women Who Tech - Tech Startup Grant"
+          ],
+          "filter_coverage": {
+            "none": 1,
+            "fail": 3,
+            "unknown": 5,
+            "pass": 1
+          },
+          "filter_flipped_to_not_match": 0
+        }
+      }
+    },
+    {
+      "name": "grid best: related_C=0.1 conflict_C=1.0 real_share=0.05",
+      "threshold": 0.15,
+      "synthetic_validation": {
+        "n": 1410,
+        "class_counts": {
+          "not_match": 1368,
+          "match": 42
+        },
+        "accuracy": 0.9617021276595744,
+        "macro_f1": 0.7611938426024665,
+        "match_precision": 0.42105263157894735,
+        "match_recall": 0.7619047619047619,
+        "match_f1": 0.5423728813559322,
+        "confusion_matrix": {
+          "rows_truth_cols_predicted": [
+            "not_match",
+            "match"
+          ],
+          "matrix": [
+            [
+              1324,
+              44
+            ],
+            [
+              10,
+              32
+            ]
+          ]
+        },
+        "predicted_match_by_original_label": {
+          "match": 32,
+          "unrelated": 29,
+          "ineligible": 15
+        },
+        "original_label_counts": {
+          "unrelated": 1237,
+          "ineligible": 131,
+          "match": 42
+        }
+      },
+      "real_dev": {
+        "n": 19,
+        "class_counts": {
+          "match": 11,
+          "not_match": 8
+        },
+        "accuracy": 0.8421052631578947,
+        "macro_f1": 0.8246153846153846,
+        "match_precision": 0.7857142857142857,
+        "match_recall": 1.0,
+        "match_f1": 0.88,
+        "confusion_matrix": {
+          "rows_truth_cols_predicted": [
+            "not_match",
+            "match"
+          ],
+          "matrix": [
+            [
+              5,
+              3
+            ],
+            [
+              0,
+              11
+            ]
+          ]
+        },
+        "false_positives": [
+          "Giving Joy Grant",
+          "UNICEF Venture Fund",
+          "Google.org Impact Challenge \u2013 AI for Science"
+        ],
+        "false_negatives": []
+      },
+      "selection_score": 0.7929046136089255,
+      "after_selection": {
+        "synthetic_test": {
+          "n": 1290,
+          "class_counts": {
+            "not_match": 1202,
+            "match": 88
+          },
+          "accuracy": 0.9534883720930233,
+          "macro_f1": 0.8484207557811618,
+          "match_precision": 0.609375,
+          "match_recall": 0.8863636363636364,
+          "match_f1": 0.7222222222222222,
+          "confusion_matrix": {
+            "rows_truth_cols_predicted": [
+              "not_match",
+              "match"
+            ],
+            "matrix": [
+              [
+                1152,
+                50
+              ],
+              [
+                10,
+                78
+              ]
+            ]
+          },
+          "predicted_match_by_original_label": {
+            "match": 78,
+            "unrelated": 20,
+            "ineligible": 30
+          },
+          "original_label_counts": {
+            "unrelated": 1083,
+            "match": 88,
+            "ineligible": 119
+          }
+        },
+        "real_test": {
+          "n": 9,
+          "class_counts": {
+            "match": 5,
+            "not_match": 4
+          },
+          "accuracy": 0.7777777777777778,
+          "macro_f1": 0.75,
+          "match_precision": 0.7142857142857143,
+          "match_recall": 1.0,
+          "match_f1": 0.8333333333333334,
+          "confusion_matrix": {
+            "rows_truth_cols_predicted": [
+              "not_match",
+              "match"
+            ],
+            "matrix": [
+              [
+                2,
+                2
+              ],
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "false_positives": [
+            "Credibly Small Business Award",
+            "GTIA Grants"
+          ],
+          "false_negatives": []
+        },
+        "hidden_post_exposure": {
+          "n": 10,
+          "class_counts": {
+            "match": 5,
+            "not_match": 5
+          },
+          "accuracy": 0.9,
+          "macro_f1": 0.898989898989899,
+          "match_precision": 1.0,
+          "match_recall": 0.8,
+          "match_f1": 0.8888888888888888,
+          "confusion_matrix": {
+            "rows_truth_cols_predicted": [
+              "not_match",
+              "match"
+            ],
+            "matrix": [
+              [
+                5,
+                0
+              ],
+              [
+                1,
+                4
+              ]
+            ]
+          },
+          "false_positives": [],
+          "false_negatives": [
+            "AWS Activate (Founders tier)"
+          ]
+        }
+      }
+    },
+    {
+      "name": "grid best: related_C=0.1 conflict_C=1.0 real_share=0.05 + filter",
+      "threshold": 0.15,
+      "synthetic_validation": {
+        "n": 1410,
+        "class_counts": {
+          "not_match": 1368,
+          "match": 42
+        },
+        "accuracy": 0.9716312056737588,
+        "macro_f1": 0.7885708287723612,
+        "match_precision": 0.5178571428571429,
+        "match_recall": 0.6904761904761905,
+        "match_f1": 0.5918367346938775,
+        "confusion_matrix": {
+          "rows_truth_cols_predicted": [
+            "not_match",
+            "match"
+          ],
+          "matrix": [
+            [
+              1341,
+              27
+            ],
+            [
+              13,
+              29
+            ]
+          ]
+        },
+        "predicted_match_by_original_label": {
+          "match": 29,
+          "unrelated": 27
+        },
+        "original_label_counts": {
+          "unrelated": 1237,
+          "ineligible": 131,
+          "match": 42
+        },
+        "filter_coverage": {
+          "fail": 1118,
+          "pass": 164,
+          "none": 47,
+          "unknown": 81
+        },
+        "filter_flipped_to_not_match": 20
+      },
+      "real_dev": {
+        "n": 19,
+        "class_counts": {
+          "match": 11,
+          "not_match": 8
+        },
+        "accuracy": 0.7894736842105263,
+        "macro_f1": 0.7738095238095238,
+        "match_precision": 0.7692307692307693,
+        "match_recall": 0.9090909090909091,
+        "match_f1": 0.8333333333333334,
+        "confusion_matrix": {
+          "rows_truth_cols_predicted": [
+            "not_match",
+            "match"
+          ],
+          "matrix": [
+            [
+              5,
+              3
+            ],
+            [
+              1,
+              10
+            ]
+          ]
+        },
+        "false_positives": [
+          "Giving Joy Grant",
+          "UNICEF Venture Fund",
+          "Google.org Impact Challenge \u2013 AI for Science"
+        ],
+        "false_negatives": [
+          "Women TechEU 2026\u20132028"
+        ],
+        "filter_coverage": {
+          "fail": 1,
+          "pass": 5,
+          "unknown": 6,
+          "none": 7
+        },
+        "filter_flipped_to_not_match": 1
+      },
+      "selection_score": 0.7811901762909426,
+      "after_selection": {
+        "synthetic_test": {
+          "n": 1290,
+          "class_counts": {
+            "not_match": 1202,
+            "match": 88
+          },
+          "accuracy": 0.9689922480620154,
+          "macro_f1": 0.8740541859897486,
+          "match_precision": 0.7926829268292683,
+          "match_recall": 0.7386363636363636,
+          "match_f1": 0.7647058823529411,
+          "confusion_matrix": {
+            "rows_truth_cols_predicted": [
+              "not_match",
+              "match"
+            ],
+            "matrix": [
+              [
+                1185,
+                17
+              ],
+              [
+                23,
+                65
+              ]
+            ]
+          },
+          "predicted_match_by_original_label": {
+            "match": 65,
+            "unrelated": 17
+          },
+          "original_label_counts": {
+            "unrelated": 1083,
+            "match": 88,
+            "ineligible": 119
+          },
+          "filter_coverage": {
+            "fail": 904,
+            "unknown": 161,
+            "pass": 225
+          },
+          "filter_flipped_to_not_match": 46
+        },
+        "real_test": {
+          "n": 9,
+          "class_counts": {
+            "match": 5,
+            "not_match": 4
+          },
+          "accuracy": 0.7777777777777778,
+          "macro_f1": 0.75,
+          "match_precision": 0.7142857142857143,
+          "match_recall": 1.0,
+          "match_f1": 0.8333333333333334,
+          "confusion_matrix": {
+            "rows_truth_cols_predicted": [
+              "not_match",
+              "match"
+            ],
+            "matrix": [
+              [
+                2,
+                2
+              ],
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          "false_positives": [
+            "Credibly Small Business Award",
+            "GTIA Grants"
+          ],
+          "false_negatives": [],
+          "filter_coverage": {
+            "pass": 3,
+            "unknown": 3,
+            "none": 3
+          },
+          "filter_flipped_to_not_match": 0
+        },
+        "hidden_post_exposure": {
+          "n": 10,
+          "class_counts": {
+            "match": 5,
+            "not_match": 5
+          },
+          "accuracy": 0.9,
+          "macro_f1": 0.898989898989899,
+          "match_precision": 1.0,
+          "match_recall": 0.8,
+          "match_f1": 0.8888888888888888,
+          "confusion_matrix": {
+            "rows_truth_cols_predicted": [
+              "not_match",
+              "match"
+            ],
+            "matrix": [
+              [
+                5,
+                0
+              ],
+              [
+                1,
+                4
+              ]
+            ]
+          },
+          "false_positives": [],
+          "false_negatives": [
+            "AWS Activate (Founders tier)"
+          ],
+          "filter_coverage": {
+            "none": 1,
+            "fail": 3,
+            "unknown": 5,
+            "pass": 1
+          },
+          "filter_flipped_to_not_match": 0
+        }
+      }
+    }
+  ],
+  "grid": [
+    {
+      "config": "related_C=0.03 conflict_C=0.1 real_share=0.05",
+      "threshold": 0.4,
+      "selection_score": 0.7838
+    },
+    {
+      "config": "related_C=0.03 conflict_C=0.1 real_share=0.1",
+      "threshold": 0.4,
+      "selection_score": 0.782
+    },
+    {
+      "config": "related_C=0.03 conflict_C=0.1 real_share=0.2",
+      "threshold": 0.35,
+      "selection_score": 0.7856
+    },
+    {
+      "config": "related_C=0.03 conflict_C=0.3 real_share=0.05",
+      "threshold": 0.2,
+      "selection_score": 0.7877
+    },
+    {
+      "config": "related_C=0.03 conflict_C=0.3 real_share=0.1",
+      "threshold": 0.2,
+      "selection_score": 0.7834
+    },
+    {
+      "config": "related_C=0.03 conflict_C=0.3 real_share=0.2",
+      "threshold": 0.2,
+      "selection_score": 0.7713
+    },
+    {
+      "config": "related_C=0.03 conflict_C=1.0 real_share=0.05",
+      "threshold": 0.15,
+      "selection_score": 0.7742
+    },
+    {
+      "config": "related_C=0.03 conflict_C=1.0 real_share=0.1",
+      "threshold": 0.2,
+      "selection_score": 0.766
+    },
+    {
+      "config": "related_C=0.03 conflict_C=1.0 real_share=0.2",
+      "threshold": 0.15,
+      "selection_score": 0.7568
+    },
+    {
+      "config": "related_C=0.1 conflict_C=0.1 real_share=0.05",
+      "threshold": 0.35,
+      "selection_score": 0.7855
+    },
+    {
+      "config": "related_C=0.1 conflict_C=0.1 real_share=0.1",
+      "threshold": 0.35,
+      "selection_score": 0.7838
+    },
+    {
+      "config": "related_C=0.1 conflict_C=0.1 real_share=0.2",
+      "threshold": 0.3,
+      "selection_score": 0.7534
+    },
+    {
+      "config": "related_C=0.1 conflict_C=0.3 real_share=0.05",
+      "threshold": 0.2,
+      "selection_score": 0.788
+    },
+    {
+      "config": "related_C=0.1 conflict_C=0.3 real_share=0.1",
+      "threshold": 0.25,
+      "selection_score": 0.7774
+    },
+    {
+      "config": "related_C=0.1 conflict_C=0.3 real_share=0.2",
+      "threshold": 0.25,
+      "selection_score": 0.7719
+    },
+    {
+      "config": "related_C=0.1 conflict_C=1.0 real_share=0.05",
+      "threshold": 0.15,
+      "selection_score": 0.7929
+    },
+    {
+      "config": "related_C=0.1 conflict_C=1.0 real_share=0.1",
+      "threshold": 0.25,
+      "selection_score": 0.7549
+    },
+    {
+      "config": "related_C=0.1 conflict_C=1.0 real_share=0.2",
+      "threshold": 0.15,
+      "selection_score": 0.76
+    },
+    {
+      "config": "related_C=0.3 conflict_C=0.1 real_share=0.05",
+      "threshold": 0.4,
+      "selection_score": 0.7584
+    },
+    {
+      "config": "related_C=0.3 conflict_C=0.1 real_share=0.1",
+      "threshold": 0.35,
+      "selection_score": 0.7703
+    },
+    {
+      "config": "related_C=0.3 conflict_C=0.1 real_share=0.2",
+      "threshold": 0.35,
+      "selection_score": 0.7642
+    },
+    {
+      "config": "related_C=0.3 conflict_C=0.3 real_share=0.05",
+      "threshold": 0.3,
+      "selection_score": 0.7907
+    },
+    {
+      "config": "related_C=0.3 conflict_C=0.3 real_share=0.1",
+      "threshold": 0.3,
+      "selection_score": 0.7835
+    },
+    {
+      "config": "related_C=0.3 conflict_C=0.3 real_share=0.2",
+      "threshold": 0.3,
+      "selection_score": 0.7616
+    },
+    {
+      "config": "related_C=0.3 conflict_C=1.0 real_share=0.05",
+      "threshold": 0.25,
+      "selection_score": 0.7785
+    },
+    {
+      "config": "related_C=0.3 conflict_C=1.0 real_share=0.1",
+      "threshold": 0.25,
+      "selection_score": 0.768
+    },
+    {
+      "config": "related_C=0.3 conflict_C=1.0 real_share=0.2",
+      "threshold": 0.3,
+      "selection_score": 0.763
+    }
+  ],
+  "hidden_profile_sensitivity_post_exposure": {
+    "provisional profile": {
+      "model only": {
+        "n": 10,
+        "class_counts": {
+          "match": 5,
+          "not_match": 5
+        },
+        "accuracy": 0.9,
+        "macro_f1": 0.898989898989899,
+        "match_precision": 1.0,
+        "match_recall": 0.8,
+        "match_f1": 0.8888888888888888,
+        "confusion_matrix": {
+          "rows_truth_cols_predicted": [
+            "not_match",
+            "match"
+          ],
+          "matrix": [
+            [
+              5,
+              0
+            ],
+            [
+              1,
+              4
+            ]
+          ]
+        },
+        "false_positives": [],
+        "false_negatives": [
+          "AWS Activate (Founders tier)"
+        ]
+      },
+      "model + filter": {
+        "n": 10,
+        "class_counts": {
+          "match": 5,
+          "not_match": 5
+        },
+        "accuracy": 0.9,
+        "macro_f1": 0.898989898989899,
+        "match_precision": 1.0,
+        "match_recall": 0.8,
+        "match_f1": 0.8888888888888888,
+        "confusion_matrix": {
+          "rows_truth_cols_predicted": [
+            "not_match",
+            "match"
+          ],
+          "matrix": [
+            [
+              5,
+              0
+            ],
+            [
+              1,
+              4
+            ]
+          ]
+        },
+        "false_positives": [],
+        "false_negatives": [
+          "AWS Activate (Founders tier)"
+        ],
+        "filter_coverage": {
+          "none": 1,
+          "fail": 3,
+          "unknown": 5,
+          "pass": 1
+        },
+        "filter_flipped_to_not_match": 0
+      }
+    },
+    "entity_type=for-profit": {
+      "model only": {
+        "n": 10,
+        "class_counts": {
+          "match": 5,
+          "not_match": 5
+        },
+        "accuracy": 0.9,
+        "macro_f1": 0.898989898989899,
+        "match_precision": 1.0,
+        "match_recall": 0.8,
+        "match_f1": 0.8888888888888888,
+        "confusion_matrix": {
+          "rows_truth_cols_predicted": [
+            "not_match",
+            "match"
+          ],
+          "matrix": [
+            [
+              5,
+              0
+            ],
+            [
+              1,
+              4
+            ]
+          ]
+        },
+        "false_positives": [],
+        "false_negatives": [
+          "AWS Activate (Founders tier)"
+        ]
+      },
+      "model + filter": {
+        "n": 10,
+        "class_counts": {
+          "match": 5,
+          "not_match": 5
+        },
+        "accuracy": 0.9,
+        "macro_f1": 0.898989898989899,
+        "match_precision": 1.0,
+        "match_recall": 0.8,
+        "match_f1": 0.8888888888888888,
+        "confusion_matrix": {
+          "rows_truth_cols_predicted": [
+            "not_match",
+            "match"
+          ],
+          "matrix": [
+            [
+              5,
+              0
+            ],
+            [
+              1,
+              4
+            ]
+          ]
+        },
+        "false_positives": [],
+        "false_negatives": [
+          "AWS Activate (Founders tier)"
+        ],
+        "filter_coverage": {
+          "none": 1,
+          "fail": 3,
+          "unknown": 4,
+          "pass": 2
+        },
+        "filter_flipped_to_not_match": 0
+      }
+    }
+  },
+  "notes": [
+    "Hidden and real held-out results are post-exposure regression checks.",
+    "Real-dev numbers are optimistic: 27 configurations and a threshold were chosen on 19 grants.",
+    "Synthetic filter gains are optimistic: synthetic requirements are templated."
+  ]
+}

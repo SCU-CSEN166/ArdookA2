@@ -12,6 +12,14 @@ Examples:
 
 Only Program, Type, Core Requirements and Amount / Benefit are read from grants; Fit,
 notes and advice columns are ignored. Output is CSV (stdout or --output).
+
+The model, its frozen threshold and whether the requirement filter runs come from
+results/ardook_match_v2/inference_config.json. `p_match` is always the model's learned score;
+`predicted` is the final decision: the filter can turn a model `match` into `not_match` when a
+stated applicant fact contradicts a stated requirement (evidence in `requirement_evidence`), and
+never the reverse. The filter is off in the v2 config (it failed its pre-declared check) and
+can be turned on with --requirement-filter. A `match` is not verified eligibility. `operating_months` is read only by the
+filter, never by the model.
 """
 
 from __future__ import annotations
@@ -23,12 +31,42 @@ import sys
 
 import pandas as pd
 
+from src.eligibility_filter import check_requirements, explain, overall
 from src.ingest import COLUMNS
 from src.match_classifier import (ARDOOK_PROFILE, GRANT_FIELDS, LABELS, MatchClassifier,
                                   TwoStageClassifier, make_pair)
 from src.paths import DEFAULT_WORKBOOK, REPO_ROOT
 
 DEFAULT_MODEL = REPO_ROOT / "results/ardook_match_v1/model.joblib"
+DEFAULT_CONFIG = REPO_ROOT / "results/ardook_match_v2/inference_config.json"
+FILTER_ONLY_FACTS = ("operating_months",)
+
+
+def load_inference_model(config_path: Path = DEFAULT_CONFIG, model_path: Path | None = None) -> MatchClassifier:
+    """The configured model with its frozen threshold and filter setting; never trains.
+
+    `model_path` overrides the configured model (its own stored threshold is then kept, and the
+    filter setting still comes from the config). Without a config: v1 model, no filter.
+    """
+    config = json.loads(Path(config_path).read_text()) if Path(config_path).is_file() else {}
+    path = Path(model_path) if model_path else REPO_ROOT / config.get("model", DEFAULT_MODEL)
+    model = MatchClassifier.load(path)
+    if model_path is None and "threshold" in config:
+        model.threshold = float(config["threshold"])
+    model.requirement_filter = bool(config.get("filter"))
+    return model
+
+
+def _split_facts(attributes: dict) -> tuple[dict, dict]:
+    """(facts the model reads, all facts the filter reads); validates filter-only facts."""
+    facts = dict(attributes)
+    for key in FILTER_ONLY_FACTS:
+        if key in facts:
+            value = float(facts[key])
+            if value < 0:
+                raise ValueError(f"{key} must be a non-negative number")
+            facts[key] = value
+    return {k: v for k, v in facts.items() if k not in FILTER_ONLY_FACTS}, facts
 ID_COLUMNS = ("Grant ID", "grant_id", "id")
 
 
@@ -52,36 +90,51 @@ def read_grants(path: Path) -> pd.DataFrame:
 
 
 def score(model: MatchClassifier, description: str, attributes: dict, grants: pd.DataFrame) -> pd.DataFrame:
-    pairs = [make_pair(description, attributes, row, key=str(row["grant_id"]))
+    model_facts, filter_facts = _split_facts(attributes)
+    pairs = [make_pair(description, model_facts, row, key=str(row["grant_id"]))
              for row in grants.to_dict("records")]
     probabilities = model.predict_proba(pairs)
+    model_prediction = [LABELS[int(p >= model.threshold)] for p in probabilities[:, 1]]
     result = pd.DataFrame({"grant_id": grants["grant_id"], "program": grants["program"],
                            f"p_{LABELS[0]}": probabilities[:, 0].round(4),
                            f"p_{LABELS[1]}": probabilities[:, 1].round(4),
-                           "predicted": [LABELS[int(p >= model.threshold)] for p in probabilities[:, 1]]})
+                           "predicted": model_prediction})
     if isinstance(model, TwoStageClassifier):
         related, no_conflict = model.stage_probabilities(pairs)
         result["p_shared_focus"] = related.round(4)
         result["p_no_requirement_conflict"] = no_conflict.round(4)
+    if getattr(model, "requirement_filter", False):
+        checks = [check_requirements(p.grant["core_requirements"], filter_facts) for p in pairs]
+        result["model_prediction"] = model_prediction
+        result["requirement_check"] = [overall(c) for c in checks]
+        result["requirement_evidence"] = [explain(c, "fail") for c in checks]
+        result["predicted"] = ["not_match" if c == "fail" else m
+                               for m, c in zip(model_prediction, result["requirement_check"])]
     return result
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--model", type=Path, default=DEFAULT_MODEL)
+    parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG,
+                        help="inference config: model, frozen threshold, requirement filter")
+    parser.add_argument("--model", type=Path, help="score with this saved model instead of the configured one")
+    parser.add_argument("--requirement-filter", action="store_true",
+                        help="also apply the requirement filter (off by default; see the v2 report)")
     who = parser.add_mutually_exclusive_group(required=True)
     who.add_argument("--ardook", action="store_true",
                      help="use the provisional Ardook profile and, unless --grants is given, Ardook_data.xlsx")
     who.add_argument("--description", help="applicant description")
     parser.add_argument("--attributes", default="{}",
-                        help='JSON facts: entity_type, region, annual_revenue, woman_led (omit unknowns)')
+                        help='JSON facts: entity_type, region, annual_revenue, woman_led, operating_months '
+                             '(omit unknowns; operating_months is used by the requirement filter only)')
     grants_from = parser.add_mutually_exclusive_group()
     grants_from.add_argument("--grants", type=Path, help=".xlsx or .csv grants table")
     grants_from.add_argument("--grant-json", help="one grant as JSON with program/type/core_requirements/amount_benefit")
     parser.add_argument("--output", type=Path, help="write CSV here instead of stdout")
     args = parser.parse_args(argv)
     try:
-        model = MatchClassifier.load(args.model)
+        model = load_inference_model(args.config, args.model)
+        model.requirement_filter = model.requirement_filter or args.requirement_filter
         if args.ardook:
             description, attributes = ARDOOK_PROFILE["description"], ARDOOK_PROFILE["attributes"]
         else:

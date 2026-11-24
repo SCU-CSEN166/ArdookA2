@@ -261,12 +261,15 @@ The script uses CPU, performs no model downloads, and refuses to overwrite an ex
 | Feedback / issue | Change made | Worked? (Yes / Partly / No) | Evidence         | Remaining limitation |
 | ---------------- | ----------- | --------------------------- | ---------------- | -------------------- |
 | [Issue]          | [Change]    | [Status]                    | [Link or metric] | [Limitation]         |
+| Match classifier missed AWS Activate and Women Who Tech on the hidden test | Retuned the classifier's regularization and real-data weight on the same splits, chosen by a protocol written first; the CLI and frontend now use v2 (threshold 0.15) | Yes | Real-dev macro-F1 0.774 → 0.825; real held-out 0.649 → 0.750; hidden 8 → 9 of 10 ([report](results/ardook_match_v2/report.json)) | Hidden rows were already seen; synthetic test macro-F1 fell 0.873 → 0.848; AWS Activate still missed |
+| No explicit check of stated requirements against applicant facts | Added a requirement filter (`src/eligibility_filter.py`); opt-in with `--requirement-filter` | Partly | Better on synthetic validation, but it rejects Women TechEU under the U.S. profile, so it is off by default | Needs Ardook's confirmed entity type, revenue and location |
 
 ### Individual contributions during that week
 
 | Member | Final implementation / evaluation / documentation contribution | Result (worked / partly / failed) | Evidence | Reflection / remaining work |
 | ------ | -------------------------------------------------------------- | --------------------------------- | -------- | --------------------------- |
 | [Name] | [Specific work]                                                | [Status]                          | [Link]   | [Reflection]                |
+| Jason Wu | Audited the hidden-test labels and earlier comparisons, tuned the match classifier (v2) under a pre-written protocol, added a requirement filter, and switched the CLI and frontend to v2 | Worked: real-dev macro-F1 0.774 → 0.825, hidden 9 of 10 | [Protocol](results/ardook_match_v2_protocol.md), [report](results/ardook_match_v2/report.json), [tuning script](src/tune_match_classifier.py) | None |
 
 ### Final submission checklist
 

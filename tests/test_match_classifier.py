@@ -14,7 +14,8 @@ from src.paths import REPO_ROOT
 from src.predict_match import DEFAULT_MODEL, main as predict_main
 from src.train_match_classifier import leakage_checks
 
-NEW_MODULES = ("src/match_classifier.py", "src/train_match_classifier.py", "src/predict_match.py")
+NEW_MODULES = ("src/match_classifier.py", "src/train_match_classifier.py", "src/predict_match.py",
+               "src/tune_match_classifier.py", "src/eligibility_filter.py")
 
 
 class LabelsAndSplits(unittest.TestCase):
@@ -123,7 +124,7 @@ class SavedModel(unittest.TestCase):
     def test_saved_model_scores_all_real_tracker_grants(self):
         stdout = io.StringIO()
         with contextlib.redirect_stdout(stdout):
-            predict_main(["--ardook"])
+            predict_main(["--ardook", "--model", str(DEFAULT_MODEL)])  # the v1 checkpoint itself
         result = pd.read_csv(io.StringIO(stdout.getvalue()))
         self.assertEqual(len(result), 37)
         expected = pd.read_csv(REPO_ROOT / "results/ardook_match_v1/ardook_predictions.csv")
